@@ -1,4 +1,4 @@
-package dev.folomkin.backend;
+package dev.folomkin.backend.resources;
 
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
