@@ -6,9 +6,7 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
 import dev.folomkin.backend.model.User;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,30 +20,66 @@ public class UserResource {
     @Context
     ServletContext context;  // Автоматически注入 Jersey
 
+    String INSERT_USER_QUERY = "INSERT INTO users (name, email) VALUES (?, ?)";
+    String CHECK_USER = "SELECT id FROM users WHERE email = ?";
+
     @POST
     public Response createUser(User user) {
-        String sql = "INSERT INTO users (name, email) VALUES (?, ?)";
 
-        try (Connection conn = getConnection(context);
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        // Проверка обязательных полей (опционально)
+        if (user.getEmail() == null || user.getEmail().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"Email обязателен\"}")
+                    .build();
+        }
 
-            pstmt.setString(1, user.getName());
-            pstmt.setString(2, user.getEmail());
-            pstmt.executeUpdate();
 
-            try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                if (generatedKeys.next()) {
-                    long generatedId = generatedKeys.getLong(1);
-                    user.setId(generatedId);  // Обновляем ID в объекте
+        try (Connection conn = getConnection(context)) {
+            // 1. Проверяем, существует ли уже пользователь с таким email
+
+            try (PreparedStatement checkStmt = conn.prepareStatement(CHECK_USER)) {
+                checkStmt.setString(1, user.getEmail());
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (rs.next()) {
+                        // Пользователь уже существует → 409 Conflict
+                        return Response.status(Response.Status.CONFLICT)  // 409
+                                .entity("{\"error\": \"Пользователь с email '" + user.getEmail() + "' уже существует\"}")
+                                .build();
+                    }
                 }
             }
 
-            return Response.status(Response.Status.CREATED).entity(user).build();
 
-        } catch (Exception e) {
+            // 2. Если не существует — вставляем
+            try (PreparedStatement pstmt = conn.prepareStatement(INSERT_USER_QUERY,
+                    Statement.RETURN_GENERATED_KEYS)) {
+                pstmt.setString(1, user.getName());
+                pstmt.setString(2, user.getEmail());
+                pstmt.executeUpdate();
+
+                // Получаем сгенерированный ID
+                try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        user.setId(generatedKeys.getLong(1));
+                    }
+                }
+            }
+
+            // 3. Успешно создано
+            return Response.status(Response.Status.CREATED)  // 201
+                    .entity(user)
+                    .build();
+
+
+        } catch (SQLException e) {
             e.printStackTrace();
-            return Response.status(500).entity("Ошибка сохранения пользователя").build();
+            // Только реальные ошибки БД — 500
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"Ошибка базы данных\"}")
+                    .build();
         }
+
+
     }
 
     @GET
