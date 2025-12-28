@@ -1,14 +1,16 @@
 package dev.folomkin.backend.util;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import java.io.File;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 @WebListener
 public class DatabaseInitializer implements ServletContextListener {
@@ -54,13 +56,74 @@ public class DatabaseInitializer implements ServletContextListener {
 
                 try (Statement stmt = conn.createStatement()) {
                     stmt.execute("""
-                    CREATE TABLE IF NOT EXISTS users (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        name TEXT NOT NULL,
-                        email TEXT UNIQUE NOT NULL
-                    )
-                    """);
+                            CREATE TABLE IF NOT EXISTS users (
+                                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                                name TEXT NOT NULL,
+                                email TEXT UNIQUE NOT NULL
+                            )
+                            """);
                     System.out.println("Таблица users создана/проверена.");
+                }
+
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.execute("""
+                            CREATE TABLE IF NOT EXISTS currency_rates
+                            (
+                                code     TEXT PRIMARY KEY,
+                                id       TEXT,
+                                num_code TEXT,
+                                nominal  INTEGER,
+                                name     TEXT,
+                                value    REAL,
+                                previous REAL
+                            );
+                            """);
+                    System.out.println("Таблица currency_rates создана/проверена.");
+                }
+
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.execute("""
+                            CREATE TABLE IF NOT EXISTS currencies
+                             (
+                                 id        integer PRIMARY KEY AUTOINCREMENT,
+                                 code      VARCHAR(50) NOT NULL,
+                                 full_name VARCHAR(50) NOT NULL,
+                                 rub_rate  DECIMAL(10, 6) NOT NULL,
+                                 sign      VARCHAR(50)
+                             );
+                            """);
+                    System.out.println("Таблица currencies создана/проверена.");
+                }
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.execute("""
+                            CREATE TABLE IF NOT EXISTS exchange_rates
+                               (
+                                   id                 SERIAL PRIMARY KEY,
+                                   base_currency_id   INT            NOT NULL,
+                                   target_currency_id INT            NOT NULL,
+                                   rate               DECIMAL(10, 6) NOT NULL CHECK (rate >= 0),
+                            
+                                   -- Внешний ключ, связывающий exchangeRates с currencies
+                                   CONSTRAINT base_currency
+                                       FOREIGN KEY (base_currency_id)
+                                           REFERENCES currencies (id)
+                                           ON DELETE RESTRICT
+                                           ON UPDATE CASCADE,
+                            
+                                   CONSTRAINT target_currency
+                                       FOREIGN KEY (target_currency_id)
+                                           REFERENCES currencies (id)
+                                           ON DELETE RESTRICT
+                                           ON UPDATE CASCADE
+                            
+                            
+                               );
+                            """);
+                    System.out.println("Таблица exchange_rates создана/проверена.");
+
+
+                    loadInitialCurrencies(conn);
+
                 }
             }
 
@@ -73,12 +136,73 @@ public class DatabaseInitializer implements ServletContextListener {
 
             System.out.println("=== ИНИЦИАЛИЗАЦИЯ БД ЗАВЕРШЕНА УСПЕШНО ===");
 
+
         } catch (Exception e) {
             System.err.println("=== ОШИБКА ИНИЦИАЛИЗАЦИИ БД ===");
             e.printStackTrace();  // Полный стек в консоль
             throw new RuntimeException("Критическая ошибка инициализации БД", e);
         }
     }
+
+
+    private void loadInitialCurrencies(Connection conn) throws Exception {
+        // Пример: API ЦБ РФ за сегодня
+        String apiUrl = "https://www.cbr-xml-daily.ru/daily_json.js";
+
+        // Делаем HTTP-запрос
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(apiUrl)
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                System.out.println("Не удалось загрузить курсы: " + response.code());
+                return;  // не падаем, если API недоступно
+            }
+
+            String json = response.body().string();
+
+            System.out.println(json);
+
+            // Парсим JSON (используем Jackson или Gson)
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(json);
+
+            JsonNode valute = root.path("Valute");
+
+            String date = root.path("Date").asText();
+
+            try (PreparedStatement pstmt = conn.prepareStatement("""
+                    INSERT INTO currencies (code, full_name, rub_rate, sign) VALUES (?, ?, ?, ?)
+                    """)) {
+
+                // Примеры популярных валют
+                String[] codes = {"USD", "EUR", "GBP", "CNY", "JPY"};
+                String[] signs = {"$", "€", "£", "¥", "¥"};
+
+                for (int i = 0; i < codes.length; i++) {
+                    String code = codes[i];
+                    JsonNode currency = valute.path(code);
+                    if (currency.isMissingNode()) continue;
+
+                    String full_name = currency.path("Name").asText();
+                    double rub_rate = currency.path("Value").asDouble();
+                    String sign = signs[i];  // Берём символ по индексу
+
+                    pstmt.setString(1, code);
+                    pstmt.setString(2, full_name);
+                    pstmt.setDouble(3, rub_rate);
+                    pstmt.setString(4, sign);
+                    pstmt.addBatch();
+                }
+
+                pstmt.executeBatch();
+                System.out.println("Курсы валют успешно загружены из " + apiUrl);
+            }
+        }
+    }
+
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
