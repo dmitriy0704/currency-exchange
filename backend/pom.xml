@@ -43,6 +43,14 @@
             <artifactId>weld-se-core</artifactId>
             <version>6.0.0.Beta4</version>
         </dependency>
+
+        <!-- Новая зависимость -->
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
