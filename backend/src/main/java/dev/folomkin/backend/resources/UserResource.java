@@ -1,6 +1,7 @@
 // src/main/java/dev/folomkin/backend/resources/UserResource.java
 package dev.folomkin.backend.resources;
 
+import dev.folomkin.backend.util.DatabaseUtil;
 import jakarta.servlet.ServletContext;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.*;
@@ -13,37 +14,49 @@ import java.util.List;
 import static dev.folomkin.backend.util.DatabaseUtil.*;
 
 @Path("/users")
-@Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_JSON)
 public class UserResource {
 
     @Context
     ServletContext context;  // Автоматически注入 Jersey
 
     String INSERT_USER_QUERY = "INSERT INTO users (name, email) VALUES (?, ?)";
-    String CHECK_USER = "SELECT id FROM users WHERE email = ?";
+    String GET_USER_BY_EMAIL = "SELECT id FROM users WHERE email = ?";
 
     @POST
-    public Response createUser(User user) {
+    @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response createUser(@FormParam("name") String name,
+                               @FormParam("email") String email) {
 
-        // Проверка обязательных полей (опционально)
-        if (user.getEmail() == null || user.getEmail().isEmpty()) {
+        // Валидация входных данных
+        if (name == null || name.trim().isEmpty()) {
             return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{\"error\": \"Email обязателен\"}")
+                    .entity("{\"error\": \"Поле 'name' обязательно\"}")
                     .build();
         }
+        if (email == null || email.trim().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"Поле 'email' обязательно\"}")
+                    .build();
+        }
+
+        name = name.trim();
+        email = email.trim().toLowerCase();  // рекомендуется хранить email в нижнем регистре
+
+        String checkSql = "SELECT id FROM users WHERE email = ?";
+        String insertSql = "INSERT INTO users (name, email) VALUES (?, ?)";
 
 
         try (Connection conn = getConnection(context)) {
             // 1. Проверяем, существует ли уже пользователь с таким email
 
-            try (PreparedStatement checkStmt = conn.prepareStatement(CHECK_USER)) {
-                checkStmt.setString(1, user.getEmail());
+            // 1. Проверка на существование пользователя с таким email
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkSql)) {
+                checkStmt.setString(1, email);
                 try (ResultSet rs = checkStmt.executeQuery()) {
                     if (rs.next()) {
-                        // Пользователь уже существует → 409 Conflict
                         return Response.status(Response.Status.CONFLICT)  // 409
-                                .entity("{\"error\": \"Пользователь с email '" + user.getEmail() + "' уже существует\"}")
+                                .entity("{\"error\": \"Пользователь с email '" + email + "' уже существует\"}")
                                 .build();
                     }
                 }
@@ -53,24 +66,31 @@ public class UserResource {
             // 2. Если не существует — вставляем
             try (PreparedStatement pstmt = conn.prepareStatement(INSERT_USER_QUERY,
                     Statement.RETURN_GENERATED_KEYS)) {
-                pstmt.setString(1, user.getName());
-                pstmt.setString(2, user.getEmail());
-                pstmt.executeUpdate();
+                pstmt.setString(1, name);
+                pstmt.setString(2, email);
+                int affectedRows = pstmt.executeUpdate();
 
+                if (affectedRows == 0) {
+                    return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                            .entity("{\"error\": \"Не удалось создать пользователя\"}")
+                            .build();
+                }
+
+
+                long generatedId = 0;
                 // Получаем сгенерированный ID
                 try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                     if (generatedKeys.next()) {
-                        user.setId(generatedKeys.getLong(1));
+                        generatedId = generatedKeys.getLong(1);
                     }
                 }
+
+                User createdUser = new User();
+                createdUser.setId(generatedId);
+                createdUser.setName(name);
+                createdUser.setEmail(email);
+                return Response.status(201).entity(createdUser).build();
             }
-
-            // 3. Успешно создано
-            return Response.status(Response.Status.CREATED)  // 201
-                    .entity(user)
-                    .build();
-
-
         } catch (SQLException e) {
             e.printStackTrace();
             // Только реальные ошибки БД — 500
@@ -78,13 +98,12 @@ public class UserResource {
                     .entity("{\"error\": \"Ошибка базы данных\"}")
                     .build();
         }
-
-
     }
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getAllUsers() {
-        String sql = "SELECT id, name, email FROM users";
+        String sql = "SELECT * FROM users";
         List<User> users = new ArrayList<>();
 
         try (Connection conn = getConnection(context);
@@ -104,6 +123,50 @@ public class UserResource {
         } catch (Exception e) {
             e.printStackTrace();
             return Response.status(500).entity("Ошибка чтения пользователей").build();
+        }
+    }
+
+    @GET
+    @Path("/{email}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUserByEmail(@PathParam("email") String email) {
+        String sql = "SELECT id, name, email FROM users  WHERE email = ?";
+
+        // Простая валидация (опционально)
+        if (email == null || email.trim().isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                    .entity("{\"error\": \"Email не может быть пустым\"}")
+                    .build();
+        }
+
+        try (Connection conn = DatabaseUtil.getConnection(context);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, email);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    // Пользователь найден
+                    User user = new User();
+                    user.setId(rs.getLong("id"));
+                    user.setName(rs.getString("name"));
+                    user.setEmail(rs.getString("email"));
+                    // user.setCreatedAt(rs.getTimestamp("created_at")); // если нужно
+
+                    return Response.ok(user).build();  // 200 OK + JSON с пользователем
+                } else {
+                    // Не найден
+                    return Response.status(Response.Status.NOT_FOUND)
+                            .entity("{\"error\": \"Пользователь с email '" + email + "' не найден\"}")
+                            .build();
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\": \"Ошибка базы данных\"}")
+                    .build();
         }
     }
 }
