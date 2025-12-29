@@ -86,7 +86,7 @@ public class DatabaseInitializer implements ServletContextListener {
                             CREATE TABLE IF NOT EXISTS currencies
                              (
                                  id        integer PRIMARY KEY AUTOINCREMENT,
-                                 code      VARCHAR(50) NOT NULL,
+                                 code      VARCHAR(50) NOT NULL UNIQUE,
                                  full_name VARCHAR(50) NOT NULL,
                                  rub_rate  DECIMAL(10, 6) NOT NULL,
                                  sign      VARCHAR(50)
@@ -120,8 +120,6 @@ public class DatabaseInitializer implements ServletContextListener {
                                );
                             """);
                     System.out.println("Таблица exchange_rates создана/проверена.");
-
-
                     loadInitialCurrencies(conn);
 
                 }
@@ -133,10 +131,7 @@ public class DatabaseInitializer implements ServletContextListener {
             if (dbFile.exists()) {
                 System.out.println("Размер файла: " + dbFile.length() + " байт");
             }
-
             System.out.println("=== ИНИЦИАЛИЗАЦИЯ БД ЗАВЕРШЕНА УСПЕШНО ===");
-
-
         } catch (Exception e) {
             System.err.println("=== ОШИБКА ИНИЦИАЛИЗАЦИИ БД ===");
             e.printStackTrace();  // Полный стек в консоль
@@ -164,13 +159,10 @@ public class DatabaseInitializer implements ServletContextListener {
             String json = response.body().string();
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(json);
-
             JsonNode valute = root.path("Valute");
-
             String date = root.path("Date").asText();
-
             try (PreparedStatement pstmt = conn.prepareStatement("""
-                    INSERT INTO currencies (code, full_name, rub_rate, sign) VALUES (?, ?, ?, ?)
+                    INSERT OR REPLACE INTO currencies (code, full_name, rub_rate, sign) VALUES (?, ?, ?, ?)
                     """)) {
 
                 // Примеры популярных валют
@@ -202,6 +194,5 @@ public class DatabaseInitializer implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        // Ничего особенного не нужно — SQLite сам закроет файл
     }
 }
