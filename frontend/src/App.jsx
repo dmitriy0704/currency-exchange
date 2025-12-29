@@ -3,6 +3,7 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 import Button from '@mui/material/Button';
+import DataList from './components/DataList'
 
 
 function App() {
@@ -10,6 +11,7 @@ function App() {
 
   return (
     <>
+    <DataList/>
       <Button variant="contained">Hello world</Button>
       <div>
         <a href="https://vite.dev" target="_blank">
