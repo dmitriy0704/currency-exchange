@@ -1,4 +1,4 @@
-package dev.folomkin.currencyexchange.config;
+package dev.folomkin.backend.config;
 
 import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.container.ContainerResponseContext;

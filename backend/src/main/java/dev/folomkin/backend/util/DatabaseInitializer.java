@@ -158,14 +158,10 @@ public class DatabaseInitializer implements ServletContextListener {
         try (Response response = client.newCall(request).execute()) {
             if (!response.isSuccessful()) {
                 System.out.println("Не удалось загрузить курсы: " + response.code());
-                return;  // не падаем, если API недоступно
+                return;
             }
 
             String json = response.body().string();
-
-            System.out.println(json);
-
-            // Парсим JSON (используем Jackson или Gson)
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(json);
 
@@ -188,7 +184,7 @@ public class DatabaseInitializer implements ServletContextListener {
 
                     String full_name = currency.path("Name").asText();
                     double rub_rate = currency.path("Value").asDouble();
-                    String sign = signs[i];  // Берём символ по индексу
+                    String sign = signs[i];
 
                     pstmt.setString(1, code);
                     pstmt.setString(2, full_name);
