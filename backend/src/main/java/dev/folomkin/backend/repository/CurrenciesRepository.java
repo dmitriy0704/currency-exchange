@@ -5,6 +5,7 @@ import dev.folomkin.backend.model.User;
 import dev.folomkin.backend.util.DatabaseUtil;
 import jakarta.servlet.ServletContext;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -36,6 +37,41 @@ public class CurrenciesRepository {
         }
         return currencies;
     }
+
+    public Currency findByCode(String code) throws SQLException {
+        String sql = "SELECT id, code, full_name, rub_rate, sign FROM currencies WHERE code = ?";
+
+        try (Connection conn = DatabaseUtil.getConnection(context);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, code);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    // Валюта найдена — формируем объект
+
+                    return mapRowToCurrency(rs);
+//                    return Response.ok(currency).build();  // 200 OK + JSON
+                } else {
+                    // Не найдена
+                    return null;
+//                    return Response.status(Response.Status.NOT_FOUND)
+//                            .entity("{\"error\": \"Валюта с кодом '" + code + "' не найдена\"}")
+//                            .build();
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+//                    .entity("{\"error\": \"Ошибка базы данных\"}")
+//                    .build();
+        }
+
+        return null;
+
+    }
+
 
     private Currency mapRowToCurrency(ResultSet rs) throws SQLException {
 
