@@ -2,5 +2,6 @@
 <project version="4">
   <component name="DataSourcePerFileMappings">
     <file url="file://$PROJECT_DIR$/src/main/java/dev/folomkin/backend/repository/CurrenciesRepository.java" value="6e50617f-793d-485f-883a-6e72efa1cd47" />
+    <file url="file://$PROJECT_DIR$/src/main/java/dev/folomkin/backend/util/DatabaseInitializer.java" value="6e50617f-793d-485f-883a-6e72efa1cd47" />
   </component>
 </project>

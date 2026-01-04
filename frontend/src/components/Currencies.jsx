@@ -32,7 +32,7 @@ function Currencies({currencies, loading, error}) {
   return (
     <ul>
       {currencies.map((currency) => (
-        <li key={currency.id}>{currency.full_name }{currency.rub_rate}</li>
+        <li key={currency.id}>{currency.code }&nbsp;{currency.name }&nbsp;{currency.rub_rate}</li>
       ))}
     </ul>
   );

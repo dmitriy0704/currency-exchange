@@ -77,9 +77,7 @@ public class UploadResource {
 
     public void saveCurrencyFromNode(JsonNode currencyNode, String code) throws SQLException {
         String sql = """
-                INSERT INTO currencies
-                (code, full_name, rub_curr)
-                VALUES (?, ?, ?)
+                INSERT INTO currencies (code, name, rub_curr) VALUES (?, ?, ?)
                 """;
 
         try (Connection conn = DatabaseUtil.getConnection(context);

@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public class Currency {
         private Long id;
-        private String full_name;
+        private String name;
         private String code;
         private BigDecimal rub_rate;
         private String sign;
@@ -18,12 +18,12 @@ public class Currency {
                 this.id = id;
         }
 
-        public String getFull_name() {
-                return full_name;
+        public String getName() {
+                return name;
         }
 
-        public void setFull_name(String full_name) {
-                this.full_name = full_name;
+        public void setName(String name) {
+                this.name = name;
         }
 
         public String getCode() {

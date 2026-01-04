@@ -87,7 +87,7 @@ public class DatabaseInitializer implements ServletContextListener {
                              (
                                  id        integer PRIMARY KEY AUTOINCREMENT,
                                  code      VARCHAR(50) NOT NULL UNIQUE,
-                                 full_name VARCHAR(50) NOT NULL,
+                                 name      VARCHAR(50) NOT NULL,
                                  rub_rate  DECIMAL(10, 6) NOT NULL,
                                  sign      VARCHAR(50)
                              );
@@ -162,7 +162,7 @@ public class DatabaseInitializer implements ServletContextListener {
             JsonNode valute = root.path("Valute");
             String date = root.path("Date").asText();
             try (PreparedStatement pstmt = conn.prepareStatement("""
-                    INSERT OR REPLACE INTO currencies (code, full_name, rub_rate, sign) VALUES (?, ?, ?, ?)
+                    INSERT OR REPLACE INTO currencies (code, name, rub_rate, sign) VALUES (?, ?, ?, ?)
                     """)) {
 
                 // Примеры популярных валют
@@ -174,12 +174,12 @@ public class DatabaseInitializer implements ServletContextListener {
                     JsonNode currency = valute.path(code);
                     if (currency.isMissingNode()) continue;
 
-                    String full_name = currency.path("Name").asText();
+                    String name = currency.path("Name").asText();
                     double rub_rate = currency.path("Value").asDouble();
                     String sign = signs[i];
 
                     pstmt.setString(1, code);
-                    pstmt.setString(2, full_name);
+                    pstmt.setString(2, name);
                     pstmt.setDouble(3, rub_rate);
                     pstmt.setString(4, sign);
                     pstmt.addBatch();
