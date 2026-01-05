@@ -92,7 +92,7 @@ function Dashboard() {
       {error && <p style={{ color: "red" }}>Ошибка: {error}</p>}
 
       <Grid container width={"xl"}>
-        <Grid size={3}>
+        <Grid size={12}>
           <Box width={300}>
             <Button
               variant={"contained"}
@@ -104,13 +104,17 @@ function Dashboard() {
             </Button>
           </Box>
         </Grid>
-        <Grid size={9}>
+        <Grid size={12}>
 
           <Box>
             <CurrencyCreateForm onSuccess={handleCurrencyCreated} />
           </Box>
 
           <Box>
+
+            <Typography variant={'h2'} fontWeight={'bold'} fontSize={18} mt={4} mb={2}>
+              Поиск по коду валюты
+            </Typography>
             <Input
               fullWidth={true}
               type="text"
@@ -143,9 +147,9 @@ function Dashboard() {
             )}
           </Box>
           <Box>
-            {!loading && currencies.length === 0 && !error && (
-              <p>Нет данных для отображения</p>
-            )}
+            {/*{!loading && currencies.length === 0 && !error && (*/}
+            {/*  <p>Нет данных для отображения</p>*/}
+            {/*)}*/}
 
             {!loading && currencies.length > 0 && (
               <Box>

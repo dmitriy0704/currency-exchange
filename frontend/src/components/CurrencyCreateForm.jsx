@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import api from '../api/axios.js';
 import qs from 'qs';
-import {Button, Input, Typography} from "@mui/material";
+import {Box, Button, Input, TextField, Typography} from "@mui/material";
 
 function CurrencyCreateForm({onSuccess}) {
     const [name, setName] = useState('');
@@ -55,83 +55,70 @@ function CurrencyCreateForm({onSuccess}) {
     };
 
     return (
-        <div style={{
-            margin: '20px 0',
-            padding: '20px',
-            border: '1px solid #ccc',
-            borderRadius: '8px'
-        }}>
+        <Box mb={2} mt={3}>
             <Typography
+                mt={3}
+                mb={2}
                 variant={'h3'}
                 fontSize={18}
                 fontWeight={'bold'}>
                 Создать новую валюту
             </Typography>
-
             <form onSubmit={handleSubmit}>
-                <div style={{marginBottom: '10px'}}>
-                    <label>
-                        Название валюты:<br/>
-                        <Input
-                            fullWidth={true}
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="Например: Доллар США"
-                            disabled={loading}
-                        />
-                    </label>
-                </div>
+                <Box pb={2}>
+                    <TextField
+                        fullWidth={true}
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Например: Доллар США"
+                        disabled={loading}
+                            label={'Национальность валюты'}
 
-                <div style={{marginBottom: '10px'}}>
-                    <label>
-                        Код валюты:<br/>
-                        <Input
-                            fullWidth={true}
-                            type="text"
-                            value={code}
-                            onChange={(e) => setCode(e.target.value.toUpperCase())}
-                            placeholder="Например: USD"
-                            maxLength="3"
-                            style={{
-                                padding: '8px',
-                                textTransform: 'uppercase'
-                            }}
-                            disabled={loading}
-                        />
-                    </label>
-                </div>
+                    />
+                </Box>
+
+                <Box pb={2}>
+                    <TextField
+                        fullWidth={true}
+                        type="text"
+                        value={code}
+                        onChange={(e) => setCode(e.target.value.toUpperCase())}
+                        placeholder="Например: USD"
+                        maxLength="3"
+                        disabled={loading}
+                        label={'Код валюты'}
+
+                    />
+                </Box>
 
 
-                <div style={{marginBottom: '10px'}}>
-                    <label>
-                        Отношение к рублю(double):<br/>
-                        <Input
-                            fullWidth={true}
-                            type="number"
-                            value={rub_rate}
-                            onChange={(e) => setRub_rate(e.target.value)}
-                            placeholder="Например: 100.0"
-                            maxLength="10"
-                            disabled={loading}
-                        />
-                    </label>
-                </div>
+                <Box pb={2}>
+                    <TextField
+                        fullWidth={true}
+                        type="number"
+                        value={rub_rate}
+                        onChange={(e) => setRub_rate(e.target.value)}
+                        placeholder="Например: 100.0"
+                        maxLength="10"
+                        disabled={loading}
+                        label={'Отношение к рублю(double)'}
+                    />
+                </Box>
 
-                <div style={{marginBottom: '10px'}}>
-                    <label>
-                        Sign валюты:<br/>
-                        <Input
-                            fullWidth={true}
-                            type="text"
-                            value={sign}
-                            onChange={(e) => setSign(e.target.value.toUpperCase())}
-                            placeholder="Например: $"
-                            maxLength="3"
-                            disabled={loading}
-                        />
-                    </label>
-                </div>
+                <Box pb={2}>
+                    <TextField
+                        fullWidth={true}
+                        type="text"
+                        value={sign}
+                        onChange={(e) => setSign(e.target.value.toUpperCase())}
+                        placeholder="Например: $"
+                        maxLength="3"
+                        disabled={loading}
+                        label={'Sign валюты'}
+
+                    />
+                </Box>
 
                 {error && <p style={{color: 'red'}}>{error}</p>}
 
@@ -145,7 +132,7 @@ function CurrencyCreateForm({onSuccess}) {
                     {loading ? 'Создаётся...' : 'Создать валюту'}
                 </Button>
             </form>
-        </div>
+        </Box>
     );
 }
 
