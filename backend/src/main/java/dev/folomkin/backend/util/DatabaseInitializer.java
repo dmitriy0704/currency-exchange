@@ -98,7 +98,7 @@ public class DatabaseInitializer implements ServletContextListener {
                     stmt.execute("""
                             CREATE TABLE IF NOT EXISTS exchange_rates
                                (
-                                   id                 SERIAL PRIMARY KEY,
+                                   id                 INTEGER PRIMARY KEY AUTOINCREMENT,
                                    base_currency_id   INT            NOT NULL,
                                    target_currency_id INT            NOT NULL,
                                    rate               DECIMAL(10, 6) NOT NULL CHECK (rate >= 0),

@@ -85,11 +85,11 @@ const columns = [
 const paginationModel = {page: 0, pageSize: 5};
 
 
-function ExchangeRates({exchange_rates, loading, error}) {
-    if (loading) return <p>Загрузка списка валют...</p>;
-    if (!exchange_rates || exchange_rates.length === 0) return <p>Список валют не загружен</p>;
-    if (loading) return <p>Загрузка...</p>;
-    if (error) return <p>Ошибка: {error}</p>;
+function ExchangeRates({exchangeRates, loadingExchangeRates, errorExchangeRates}) {
+    if (loadingExchangeRates) return <p>Загрузка списка курсов обмена валют...</p>;
+    if (!exchangeRates || exchangeRates.length === 0) return <p>Список курсов обмена валют не загружен</p>;
+    if (loadingExchangeRates) return <p>Загрузка...</p>;
+    if (errorExchangeRates) return <p>Ошибка: {errorExchangeRates}</p>;
 
     return (
         <Box>
@@ -99,7 +99,7 @@ function ExchangeRates({exchange_rates, loading, error}) {
                     <Box>
                         <Typography variant={'h2'} fontWeight={'bold'}
                                     fontSize={18} mt={4} mb={2}>
-                            Обменные курсы
+                            Курсы обмена валют
                         </Typography>
                     </Box>
                 </Grid>
@@ -114,7 +114,7 @@ function ExchangeRates({exchange_rates, loading, error}) {
                         }}>
                             <DataGrid
                                 label={'LABEL'}
-                                rows={exchange_rates}
+                                rows={exchangeRates}
                                 columns={columns}
                                 initialState={{pagination: {paginationModel}}}
                                 pageSizeOptions={[5, 10]}
@@ -128,7 +128,7 @@ function ExchangeRates({exchange_rates, loading, error}) {
                     <Box>
                         <Box sx={{textAlign: 'left'}}>
                             <ReactJsonView
-                                src={exchange_rates}
+                                src={exchangeRates}
                                 theme="rjv-default"
                                 displayObjectSize={true}
                                 collapsed={false}

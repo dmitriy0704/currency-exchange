@@ -14,7 +14,7 @@ import java.sql.SQLException;
 
 @Path("/exchangeRate")
 @Produces(MediaType.APPLICATION_JSON)
-@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+@Consumes(MediaType.APPLICATION_JSON)
 public class ExchangeRateResource {
 
     @Context
@@ -35,8 +35,6 @@ public class ExchangeRateResource {
     @Path("/{codes}")
     public Response getExchangeRate(@PathParam("codes") String codes) {
 
-
-//
 //        if (baseCode == null || targetCode == null ||
 //                baseCode.length() != 3 || targetCode.length() != 3) {
 //            return Response.status(Response.Status.BAD_REQUEST)

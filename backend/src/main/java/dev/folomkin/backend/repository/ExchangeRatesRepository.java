@@ -7,10 +7,9 @@ import jakarta.servlet.ServletContext;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,8 +61,6 @@ public class ExchangeRatesRepository {
 
 
     public ExchangeRate findByCodes(String baseCode, String targetCode) {
-
-
         String sql = """
                 SELECT 
                     er.id AS rate_id,
@@ -112,6 +109,135 @@ public class ExchangeRatesRepository {
     }
 
 
+    public ExchangeRate saveExchangeRate(String baseCode, String targetCode, BigDecimal rate) {
+        System.out.printf("BASECODE:  " + baseCode);
+        baseCode = baseCode.toUpperCase();
+        targetCode = targetCode.toUpperCase();
+
+        String sqlFindCurrencies = """
+                SELECT id, name, code, rub_rate, sign FROM currencies
+                WHERE code IN (?, ?)
+                ORDER BY code = ? DESC, code = ? DESC
+                """;
+
+        String sqlInsertRate = """
+                INSERT INTO exchange_rates (base_currency_id, target_currency_id, rate)
+                VALUES (?, ?, ?)
+                """;
+
+        try (Connection conn = DatabaseUtil.getConnection(context)) {
+            // Ищем обе валюты по коду
+            Long baseId = null, targetId = null;
+            Currency baseCurrency = null, targetCurrency = null;
+
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlFindCurrencies)) {
+
+                pstmt.setString(1, baseCode);
+                pstmt.setString(2, targetCode);
+                pstmt.setString(3, baseCode);
+                pstmt.setString(4, targetCode);
+
+                try (ResultSet rs = pstmt.executeQuery()) {
+                    while (rs.next()) {
+                        String code = rs.getString("code");
+                        if (code.equals(baseCode)) {
+                            baseId = rs.getLong("id");
+                            baseCurrency = new Currency(
+                                    baseId,
+                                    rs.getString("name"),
+                                    code,
+                                    rs.getBigDecimal("rub_rate"),
+                                    rs.getString("sign")
+                            );
+                        } else if (code.equals(targetCode)) {
+                            targetId = rs.getLong("id");
+                            targetCurrency = new Currency(
+                                    targetId,
+                                    rs.getString("name"),
+                                    code,
+                                    rs.getBigDecimal("rub_rate"),
+                                    rs.getString("sign")
+                            );
+                        }
+                    }
+                }
+            }
+
+//            // Проверяем, найдены ли обе валюты
+//            if (baseCurrency == null) {
+//                return Response.status(Response.Status.NOT_FOUND)
+//                        .entity("{\"error\": \"Базовая валюта с кодом " + baseCode + " не найдена\"}")
+//                        .build();
+//            }
+//            if (targetCurrency == null) {
+//                return Response.status(Response.Status.NOT_FOUND)
+//                        .entity("{\"error\": \"Целевая валюта с кодом " + targetCode + " не найдена\"}")
+//                        .build();
+//            }
+// Проверяем, нет ли уже такой пары (опционально, но рекомендуется)
+            String checkDuplicate = """
+                    SELECT 1 FROM exchange_rates
+                    WHERE base_currency_id = ? AND target_currency_id = ?
+                    """;
+            try (PreparedStatement check = conn.prepareStatement(checkDuplicate)) {
+                check.setLong(1, baseId);
+                check.setLong(2, targetId);
+                try (ResultSet rs = check.executeQuery()) {
+                    if (rs.next()) {
+                        throw new RuntimeException("Пара " + baseCode + "/" + targetCode + " уже существует");
+//                        return Response.status(Response.Status.CONFLICT)
+//                                .entity("{\"error\": \"Пара " + baseCode + "/" + targetCode + " уже существует\"}")
+//                                .build();
+                    }
+                }
+            }
+
+            // Вставляем новую пару
+            try (PreparedStatement pstmt = conn.prepareStatement(sqlInsertRate, Statement.RETURN_GENERATED_KEYS)) {
+
+                assert baseCurrency != null;
+                assert targetCurrency != null;
+                BigDecimal calculateRates = calculateRates(
+                        baseCurrency.getRub_rate(),
+                        targetCurrency.getRub_rate()
+                );
+
+                pstmt.setLong(1, baseId);
+                pstmt.setLong(2, targetId);
+                pstmt.setBigDecimal(3, calculateRates);
+                pstmt.executeUpdate();
+
+                // Получаем сгенерированный ID
+                long generatedId;
+                try (ResultSet keys = pstmt.getGeneratedKeys()) {
+                    if (keys.next()) {
+                        generatedId = keys.getLong(1);
+                    } else {
+                        throw new SQLException("Не удалось получить ID новой записи");
+                    }
+                }
+                // Формируем ответ
+                ExchangeRate exchangeRate = new ExchangeRate(
+                        generatedId,
+                        baseCurrency,
+                        targetCurrency,
+                        calculateRates
+                );
+//                return Response.status(Response.Status.CREATED)  // 201
+//                        .entity(dto)
+//                        .build();
+                return exchangeRate;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+//                    .entity("{\"error\": \"Ошибка базы данных\"}")
+//                    .build();
+            return null;
+        }
+    }
+
+
     public ExchangeRate mapToExchangeRate(ResultSet rs) throws SQLException {
         Currency base = new Currency(
                 rs.getLong("base_id"),
@@ -137,5 +263,28 @@ public class ExchangeRatesRepository {
         );
 
         return rate;
+    }
+
+
+    public BigDecimal calculateRates(BigDecimal baseCurrencyRate, BigDecimal targetCurrencyRate) throws SQLException {
+
+        if (baseCurrencyRate == null || targetCurrencyRate == null) {
+            throw new IllegalArgumentException("Значение валют не должны быть равны нулю");
+        }
+
+//      Расчет на примере доллара и евро:
+//      Для каждой валюты известно отношение к рублю. Рассчитываем кросс-курс
+//        USD/EUR = USD/RUB * RUB/EUR -> Базовая формула: AC = A/B * B/C
+//        USD/RUB = 79.7296 RUB -> baseCurrencyRate
+//        EUR/RUB = 93.5626 RUB -> targetCurrencyRate
+//        RUB/USD = 1/79.7296 = 0.0125
+//        RUB/EUR = 1/93.5626 = 0.0107
+//        EUR/USD = 1.16
+//        USD/EUR = 79.7296 * 0.0107 = 0.8531
+
+        BigDecimal rub = new BigDecimal(1);
+        BigDecimal roundedResult = rub.divide(targetCurrencyRate, 4, RoundingMode.HALF_UP);
+
+        return baseCurrencyRate.multiply(roundedResult);
     }
 }
