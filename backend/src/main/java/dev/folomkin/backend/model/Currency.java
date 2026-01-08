@@ -9,6 +9,16 @@ public class Currency {
         private BigDecimal rub_rate;
         private String sign;
 
+        public Currency() {
+        }
+
+        public Currency(Long id, String name, String code, BigDecimal rub_rate, String sign) {
+                this.id = id;
+                this.name = name;
+                this.code = code;
+                this.rub_rate = rub_rate;
+                this.sign = sign;
+        }
 
         public Long getId() {
                 return id;

@@ -25,7 +25,6 @@ public class CurrencyResource {
 
     private CurrenciesService currenciesService;
 
-
     @PostConstruct
     public void init() {
         CurrenciesRepository repository = new CurrenciesRepository(context);
@@ -52,7 +51,6 @@ public class CurrencyResource {
         }
     }
 
-
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
@@ -74,6 +72,4 @@ public class CurrencyResource {
             return Response.status(500).entity("{\"error\": \"Ошибка базы данных\"}").build();
         }
     }
-
-
 }

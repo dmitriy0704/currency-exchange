@@ -121,7 +121,6 @@ public class DatabaseInitializer implements ServletContextListener {
                             """);
                     System.out.println("Таблица exchange_rates создана/проверена.");
                     loadInitialCurrencies(conn);
-
                 }
             }
 
@@ -134,7 +133,7 @@ public class DatabaseInitializer implements ServletContextListener {
             System.out.println("=== ИНИЦИАЛИЗАЦИЯ БД ЗАВЕРШЕНА УСПЕШНО ===");
         } catch (Exception e) {
             System.err.println("=== ОШИБКА ИНИЦИАЛИЗАЦИИ БД ===");
-            e.printStackTrace();  // Полный стек в консоль
+            e.printStackTrace();
             throw new RuntimeException("Критическая ошибка инициализации БД", e);
         }
     }
@@ -161,9 +160,21 @@ public class DatabaseInitializer implements ServletContextListener {
             JsonNode root = mapper.readTree(json);
             JsonNode valute = root.path("Valute");
             String date = root.path("Date").asText();
-            try (PreparedStatement pstmt = conn.prepareStatement("""
+
+            String sql = """
+        INSERT INTO currencies (code, name, rub_rate, sign)
+        VALUES (?, ?, ?, ?)
+        ON CONFLICT(code) DO UPDATE SET
+            name = excluded.name,
+            rub_rate = excluded.rub_rate,
+            sign = excluded.sign
+        """;
+
+            String sqlInsert = """
                     INSERT OR REPLACE INTO currencies (code, name, rub_rate, sign) VALUES (?, ?, ?, ?)
-                    """)) {
+                    """;
+
+            try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
                 // Примеры популярных валют
                 String[] codes = {"USD", "EUR", "GBP", "CNY", "JPY"};

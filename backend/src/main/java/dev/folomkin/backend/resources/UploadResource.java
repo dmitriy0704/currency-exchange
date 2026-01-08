@@ -32,19 +32,14 @@ public class UploadResource {
     @GET
     @Produces("application/json")
     public void getCurrencies() throws SQLException, IOException, InterruptedException, URISyntaxException {
-
         try {
             String json = fetchJson("https://www.cbr-xml-daily.ru/daily_json.js");
-
             ObjectMapper mapper = new ObjectMapper();
             JsonNode root = mapper.readTree(json);
-
             JsonNode valuteNode = root.path("Valute");
             valuteNode.fields().forEachRemaining(entry -> {
-
                 String code = entry.getKey(); // "USD", "EUR"
                 JsonNode currencyNode = entry.getValue();
-
                 try {
                     saveCurrencyFromNode(currencyNode, code);
                     System.out.println("Сохранена валюта: " + code);
@@ -52,19 +47,16 @@ public class UploadResource {
                     System.err.println("Ошибка при сохранении " + code + ": " + e.getMessage());
                 }
             });
-
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
 
     public String fetchJson(String url) throws Exception {
         Request request = new Request.Builder()
                 .url(url)
                 .header("Accept", "application/json")
                 .build();
-
         try (Response response = client.newCall(request).execute()) {
             if (response.isSuccessful() && response.body() != null) {
                 return response.body().string();
@@ -74,12 +66,10 @@ public class UploadResource {
         }
     }
 
-
     public void saveCurrencyFromNode(JsonNode currencyNode, String code) throws SQLException {
         String sql = """
                 INSERT INTO currencies (code, name, rub_curr) VALUES (?, ?, ?)
                 """;
-
         try (Connection conn = DatabaseUtil.getConnection(context);
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             pstmt.setString(1, code); // CharCode (USD, EUR)
