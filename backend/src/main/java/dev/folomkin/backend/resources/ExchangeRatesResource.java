@@ -35,7 +35,7 @@ public class ExchangeRatesResource {
 
 
     @GET
-    public Response getAllCurrencies() {
+    public Response getAllExchangeRates() {
         try {
             return Response.ok(service.getAllExchangeRates()).build();
         } catch (SQLException e) {

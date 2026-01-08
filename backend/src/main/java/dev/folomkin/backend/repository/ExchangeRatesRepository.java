@@ -61,6 +61,57 @@ public class ExchangeRatesRepository {
     }
 
 
+    public ExchangeRate findByCodes(String baseCode, String targetCode) {
+
+
+        String sql = """
+                SELECT 
+                    er.id AS rate_id,
+                    er.rate,
+                    base.id AS base_id,
+                    base.name AS base_name,
+                    base.code AS base_code,
+                    base.rub_rate AS base_rub_rate,
+                    base.sign AS base_sign,
+                    target.id AS target_id,
+                    target.name AS target_name,
+                    target.code AS target_code,
+                    target.rub_rate AS target_rub_rate,
+                    target.sign AS target_sign
+                FROM exchange_rates er
+                JOIN currencies base ON er.base_currency_id = base.id
+                JOIN currencies target ON er.target_currency_id = target.id
+                WHERE base.code = ? AND target.code = ?
+                """;
+
+        try (Connection conn = DatabaseUtil.getConnection(context);
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, baseCode);
+            pstmt.setString(2, targetCode);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+
+                    // Возвращаем один объект (не массив!)
+                    return mapToExchangeRate(rs);
+                } else {
+                    return null;
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+//                    .entity("{\"error\": \"Ошибка базы данных\"}")
+//                    .build();
+
+            return null;
+        }
+
+    }
+
+
     public ExchangeRate mapToExchangeRate(ResultSet rs) throws SQLException {
         Currency base = new Currency(
                 rs.getLong("base_id"),

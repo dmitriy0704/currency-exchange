@@ -28,9 +28,14 @@ const columns = [
 const paginationModel = {page: 0, pageSize: 5};
 
 
-function Currencies({currencies, loading, error}) {
+function Currencies({currencies, loading, error, isSearching}) {
+
+
+
     if (loading) return <p>Загрузка списка валют...</p>;
-    if (!currencies || currencies.length === 0) return <p>Нет данных</p>;
+    if (!currencies || currencies.length === 0) return <p>Список валют не загружен</p>;
+
+
 
     // const [data, setData] = useState([]);
     // const [loading, setLoading] = useState(true);
@@ -66,6 +71,18 @@ function Currencies({currencies, loading, error}) {
             {/*</ul>*/}
 
             <Grid container>
+
+                <Grid size={12}>
+                    {!loading && currencies.length > 0 && (
+                        <Box>
+                            <h3>
+                                {isSearching
+                                    ? `Найдена валюта (${currencies.length})`
+                                    : `Все валюты (${currencies.length})`}
+                            </h3>
+                        </Box>
+                    )}
+                </Grid>
                 <Grid size={7} p={2}>
 
                     <Box>
