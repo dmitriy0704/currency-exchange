@@ -45,7 +45,7 @@ function Currencies({currencies, loading, error, isSearching}) {
     //   const fetchData = async () => {
     //     try {
     //       const response = await api.get('/currencies');
-    //       setData(response.data);  // Axios автоматически парсит JSON
+    //       set(response.data);  // Axios автоматически парсит JSON
     //     } catch (err) {
     //       setError(err.message);
     //     } finally {

@@ -13,8 +13,7 @@ public class CorsFilter implements ContainerResponseFilter {
                        ContainerResponseContext responseContext) {
 
         responseContext.getHeaders().add(
-                "Access-Control-Allow-Origin", "http://localhost:5173"); // Ваш фронтенд
-
+                "Access-Control-Allow-Origin", "*");  // Или конкретный origin, например "http://localhost:3000"
         responseContext.getHeaders().add(
                 "Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 

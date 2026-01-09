@@ -1,10 +1,11 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import api from "../api/axios.js"; // твой настроенный axios
 import Currencies from "./Currencies.jsx";
 import {Box, Button, Grid, Input, Typography} from "@mui/material";
 import CurrencyCreateForm from "./CurrencyCreateForm.jsx";
 import ExchangeRates from "./ExchangeRates.jsx";
 import ExchangeRatesCreateForm from "./ExchangeRatesCreateForm.jsx";
+import CurrencyExchange from "./CurrencyExchange.jsx";
 
 function Dashboard() {
     const [currencies, setCurrencies] = useState([]);
@@ -12,6 +13,7 @@ function Dashboard() {
     const [isSearchingCurrency, setIsSearchingCurrency] = useState(false); // Чтобы знать, в каком мы режиме
     const [loadingCurrencies, setLoadingCurrencies] = useState(false);
     const [errorCurrencies, setErrorCurrencies] = useState(null);
+
 
     const [exchangeRates, setExchangeRates] = useState([])
     const [codesExchangeRate, setCodesExchangeRate] = useState(""); // Значение из input
@@ -21,19 +23,28 @@ function Dashboard() {
 
 
     //-> Загрузка списка валют
-    const loadAllCurrencies = async () => {
-        setLoadingCurrencies(true);
-        setErrorCurrencies(null);
-        try {
-            const currenciesRes = await api.get("/currencies");
-            setCurrencies(currenciesRes.data);
-        } catch (err) {
-            setErrorCurrencies(err.response?.data?.message || err.message || "Ошибка загрузки");
-            console.error(err);
-        } finally {
-            setLoadingCurrencies(false);
-        }
-    };
+
+
+        const loadAllCurrencies = async () => {
+            setLoadingCurrencies(true);
+            setErrorCurrencies(null);
+            try {
+                const currenciesRes = await api.get("/currencies");
+                setCurrencies(currenciesRes.data);
+            } catch (err) {
+                setErrorCurrencies(err.response?.data?.message || err.message || "Ошибка загрузки");
+                console.error(err);
+            } finally {
+                setLoadingCurrencies(false);
+            }
+        };
+
+    useEffect(() => {
+        loadAllCurrencies();
+    }, []);
+
+
+
 
     //-> Поиск валюты по коду
     const handleCurrenciesLoadData = async () => {
@@ -160,30 +171,32 @@ function Dashboard() {
 
     return (
         <Box>
-            <Typography variant={"h1"} fontSize={24} fontWeight={"bold"}>
-                Обмен валют
-            </Typography>
-            {errorCurrencies &&
-                <p style={{color: "red"}}>Ошибка: {errorCurrencies}</p>}
             <Grid container width={"xl"}>
                 <Grid size={12}>
-                    <Box width={300}>
+                    <Box>
+                        <Typography
+                            variant={"h1"}
+                            fontSize={24}
+                            fontWeight={"bold"}
+                            mb={5}
+                        >
+                            Обмен валют
+                        </Typography>
+                        {errorCurrencies &&
+                            <p style={{color: "red"}}>Ошибка: {errorCurrencies}</p>}
+                    </Box>
+                </Grid>
+                <Grid size={12}>
+                    <Box>
                         <Button
+                            fullWidth={true}
                             variant={"contained"}
-                            sx={{width: 300}}
                             onClick={loadAllCurrencies}
                             disabled={loadingCurrencies}
                         >
                             {loadingCurrencies ? "Загружается..." : "Обновить список валют"}
                         </Button>
-                        <Button
-                            variant={"contained"}
-                            sx={{width: 300}}
-                            onClick={loadAllExchangeRates}
-                            disabled={loadingCurrencies}
-                        >
-                            {loadingExchangeRates ? "Загружается..." : "Обновить список обменного курса валют"}
-                        </Button>
+
                     </Box>
                 </Grid>
                 <Grid size={12}>
@@ -203,16 +216,14 @@ function Dashboard() {
                             // onKeyPress={handleKeyPress}
                             placeholder="Введите код валюты (например, USD)"
                             style={{
-                                padding: "8px",
-                                width: "200px",
                                 textTransform: "uppercase",
                             }}
                         />
                         <Button
+                            fullWidth={true}
                             variant={"contained"}
                             onClick={handleCurrenciesLoadData}
                             disabled={loadingCurrencies || !codeCurrency.trim()}
-                            style={{marginLeft: "10px", padding: "8px 16px"}}
                         >
                             {loadingCurrencies ? "Загружается..." : "Найти"}
                         </Button>
@@ -240,10 +251,20 @@ function Dashboard() {
                 <Box>
                     <Typography variant={'h2'} fontWeight={'bold'}
                                 fontSize={24} mt={4} mb={2}>
-                        Курс обмена валют
+                        Обменные курсы валют
                     </Typography>
                 </Box>
 
+                <Box>
+                    <Button
+                        fullWidth={true}
+                        variant={"contained"}
+                        onClick={loadAllExchangeRates}
+                        disabled={loadingCurrencies}
+                    >
+                        {loadingExchangeRates ? "Загружается..." : "Обновить список обменного курса валют"}
+                    </Button>
+                </Box>
                 <Box>
                     <ExchangeRatesCreateForm onSuccess={handleExchangeRatesCreated} />
                 </Box>
@@ -289,6 +310,12 @@ function Dashboard() {
                         loadingExchangeRates={loadingExchangeRates}
                         errorExchangeRates={errorExchangeRates}
                     />
+                </Box>
+            </Grid>
+
+            <Grid size={12}>
+                <Box>
+                    <CurrencyExchange/>
                 </Box>
             </Grid>
         </Box>

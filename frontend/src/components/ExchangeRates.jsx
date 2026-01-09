@@ -95,14 +95,14 @@ function ExchangeRates({exchangeRates, loadingExchangeRates, errorExchangeRates}
         <Box>
             <Grid container>
 
-                <Grid size={12}>
-                    <Box>
-                        <Typography variant={'h2'} fontWeight={'bold'}
-                                    fontSize={18} mt={4} mb={2}>
-                            Курсы обмена валют
-                        </Typography>
-                    </Box>
-                </Grid>
+                {/*<Grid size={12}>*/}
+                {/*    <Box>*/}
+                {/*        <Typography variant={'h2'} fontWeight={'bold'}*/}
+                {/*                    fontSize={18} mt={4} mb={2}>*/}
+                {/*            Обменные курсы валют*/}
+                {/*        </Typography>*/}
+                {/*    </Box>*/}
+                {/*</Grid>*/}
 
                 <Grid size={8} p={2}>
 
