@@ -1,5 +1,6 @@
 package dev.folomkin.backend.repository;
 
+import dev.folomkin.backend.exception.NotFoundException;
 import dev.folomkin.backend.model.Currency;
 import dev.folomkin.backend.util.DatabaseUtil;
 import jakarta.servlet.ServletContext;
@@ -45,7 +46,8 @@ public class CurrenciesRepository {
 //                    return Response.ok(currency).build();  // 200 OK + JSON
                 } else {
                     // Не найдена
-                    return null;
+throw new NotFoundException("Валюта не найдена");
+//                    return null;
 //                    return Response.status(Response.Status.NOT_FOUND)
 //                            .entity("{\"error\": \"Валюта с кодом '" + code + "' не найдена\"}")
 //                            .build();
@@ -57,9 +59,10 @@ public class CurrenciesRepository {
 //            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
 //                    .entity("{\"error\": \"Ошибка базы данных\"}")
 //                    .build();
+
+            throw new SQLException("Ошибка БД");
         }
 
-        return null;
     }
 
 

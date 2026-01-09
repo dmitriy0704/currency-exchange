@@ -1,7 +1,15 @@
 import React, {useEffect, useState} from "react";
 import api from "../api/axios.js"; // твой настроенный axios
 import Currencies from "./Currencies.jsx";
-import {Box, Button, Grid, Input, Typography} from "@mui/material";
+import {
+    Alert,
+    Box,
+    Button,
+    FormHelperText,
+    Grid,
+    Input,
+    Typography
+} from "@mui/material";
 import CurrencyCreateForm from "./CurrencyCreateForm.jsx";
 import ExchangeRates from "./ExchangeRates.jsx";
 import ExchangeRatesCreateForm from "./ExchangeRatesCreateForm.jsx";
@@ -13,6 +21,7 @@ function Dashboard() {
     const [isSearchingCurrency, setIsSearchingCurrency] = useState(false); // Чтобы знать, в каком мы режиме
     const [loadingCurrencies, setLoadingCurrencies] = useState(false);
     const [errorCurrencies, setErrorCurrencies] = useState(null);
+    const [errorNotFoundCurrencies, setErrorNotFoundCurrencies] = useState(null);
 
 
     const [exchangeRates, setExchangeRates] = useState([])
@@ -65,7 +74,7 @@ function Dashboard() {
             setCodeCurrency("");
         } catch (err) {
             if (err.response?.status === 404) {
-                setErrorCurrencies(`Валюта с кодом "${codeCurrency}" не найдена`);
+                setErrorNotFoundCurrencies(err.response?.data.error);
                 setCurrencies([]);
             } else {
                 setErrorCurrencies(err.response?.data?.message || "Не удалось загрузить данные");
@@ -95,7 +104,7 @@ function Dashboard() {
 
     const resetSearch = () => {
         setCodeCurrency("");
-        setErrorCurrencies(null);
+        setErrorNotFoundCurrencies(null);
         loadAllCurrencies();
         setIsSearchingCurrency(false)
     };
@@ -216,6 +225,8 @@ function Dashboard() {
                             // onKeyPress={handleKeyPress}
                             placeholder="Введите код валюты (например, USD)"
                             style={{
+                                marginTop: 16,
+                                marginBottom: 16,
                                 textTransform: "uppercase",
                             }}
                         />
@@ -236,6 +247,12 @@ function Dashboard() {
                                 Сбросить поиск
                             </Button>
                         )}
+
+                        <Box>
+                            {errorNotFoundCurrencies &&
+                                <Alert severity="error">{errorNotFoundCurrencies}</Alert>
+                            }
+                        </Box>
                     </Box>
                     <Box>
                         <Currencies
