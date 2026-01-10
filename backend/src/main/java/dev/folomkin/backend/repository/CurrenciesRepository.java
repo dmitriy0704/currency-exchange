@@ -1,5 +1,6 @@
 package dev.folomkin.backend.repository;
 
+import dev.folomkin.backend.exception.AlreadyExistsException;
 import dev.folomkin.backend.exception.NotFoundException;
 import dev.folomkin.backend.model.Currency;
 import dev.folomkin.backend.util.DatabaseUtil;
@@ -38,28 +39,17 @@ public class CurrenciesRepository {
         String sql = "SELECT id, code, name, rub_rate, sign FROM currencies WHERE code = ?";
         try (Connection conn = DatabaseUtil.getConnection(context);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, code);
+            pstmt.setString(1, code.toUpperCase());
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-                    // Валюта найдена — формируем объект
                     return mapRowToCurrency(rs);
-//                    return Response.ok(currency).build();  // 200 OK + JSON
                 } else {
-                    // Не найдена
-throw new NotFoundException("Валюта не найдена");
-//                    return null;
-//                    return Response.status(Response.Status.NOT_FOUND)
-//                            .entity("{\"error\": \"Валюта с кодом '" + code + "' не найдена\"}")
-//                            .build();
+                    throw new NotFoundException("Валюта с кодом " + code + " не найдена");
                 }
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
-//            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-//                    .entity("{\"error\": \"Ошибка базы данных\"}")
-//                    .build();
-
             throw new SQLException("Ошибка БД");
         }
 
@@ -73,7 +63,7 @@ throw new NotFoundException("Валюта не найдена");
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
             pstmt.setString(1, name.trim());
-            pstmt.setString(2, code.trim());
+            pstmt.setString(2, code.trim().toUpperCase());
             pstmt.setBigDecimal(3, rub_rate);
             pstmt.setString(4, sign.trim());
             pstmt.executeUpdate();

@@ -1,5 +1,8 @@
 package dev.folomkin.backend.service;
 
+import dev.folomkin.backend.exception.AlreadyExistsException;
+import dev.folomkin.backend.exception.NotFoundException;
+import dev.folomkin.backend.exception.ValidationException;
 import dev.folomkin.backend.model.Currency;
 import dev.folomkin.backend.model.ExchangeRate;
 import dev.folomkin.backend.repository.CurrenciesRepository;
@@ -37,28 +40,29 @@ public class ExchangeRatesService {
     }
 
 
+    public ExchangeRate createExchangeRates(String baseCode, String targetCode) throws SQLException {
 
-    public ExchangeRate createExchangeRates(String baseCode, String targetCode, BigDecimal rate) throws SQLException{
-//        if (baseCode == null || baseCode.trim().isEmpty() || baseCode.length() != 3) {
-//            return Response.status(Response.Status.BAD_REQUEST)
-//                    .entity("{\"error\": \"Код базовой валюты должен состоять из 3 букв\"}")
-//                    .build();
-//        }
-//        if (targetCode == null || targetCode.trim().isEmpty() || targetCode.length() != 3) {
-//            return Response.status(Response.Status.BAD_REQUEST)
-//                    .entity("{\"error\": \"Код целевой валюты должен состоять из 3 букв\"}")
-//                    .build();
-//        }
+
+        if (baseCode == null || baseCode.trim().isEmpty() || baseCode.length() != 3) {
+            throw new ValidationException("Код базовой валюты должен состоять из 3 букв");
+        }
+        if (targetCode == null || targetCode.trim().isEmpty() || targetCode.length() != 3) {
+            throw new ValidationException("Код целевой валюты должен состоять из 3 букв");
+        }
 //        if (rate == null || rate.compareTo(BigDecimal.ZERO) <= 0) {
-//            return Response.status(Response.Status.BAD_REQUEST)
-//                    .entity("{\"error\": \"Курс должен быть положительным числом\"}")
-//                    .build();
+//            throw new ValidationException("Курс должен быть положительным числом");
 //        }
-//        if (baseCode.equalsIgnoreCase(targetCode)) {
-//            return Response.status(Response.Status.BAD_REQUEST)
-//                    .entity("{\"error\": \"Базовая и целевая валюты не могут быть одинаковыми\"}")
-//                    .build();
-//        }
-        return repository.saveExchangeRate(baseCode, targetCode, rate);
+        if (baseCode.equalsIgnoreCase(targetCode)) {
+            throw new ValidationException("Базовая и целевая валюты не могут быть одинаковыми");
+        }
+
+        try {
+            repository.findByCodes(baseCode, targetCode);
+            throw new AlreadyExistsException("Обменный курс уже существует");
+        } catch (NotFoundException e) {
+            return repository.save(baseCode, targetCode);
+
+        }
+
     }
 }

@@ -22,6 +22,7 @@ function Dashboard() {
     const [loadingCurrencies, setLoadingCurrencies] = useState(false);
     const [errorCurrencies, setErrorCurrencies] = useState(null);
     const [errorNotFoundCurrencies, setErrorNotFoundCurrencies] = useState(null);
+    const [errorAlreadyExistCurrencies, setErrorAlreadyExistCurrencies] = useState(null);
 
 
     const [exchangeRates, setExchangeRates] = useState([])
@@ -34,25 +35,23 @@ function Dashboard() {
     //-> Загрузка списка валют
 
 
-        const loadAllCurrencies = async () => {
-            setLoadingCurrencies(true);
-            setErrorCurrencies(null);
-            try {
-                const currenciesRes = await api.get("/currencies");
-                setCurrencies(currenciesRes.data);
-            } catch (err) {
-                setErrorCurrencies(err.response?.data?.message || err.message || "Ошибка загрузки");
-                console.error(err);
-            } finally {
-                setLoadingCurrencies(false);
-            }
-        };
+    const loadAllCurrencies = async () => {
+        setLoadingCurrencies(true);
+        setErrorCurrencies(null);
+        try {
+            const currenciesRes = await api.get("/currencies");
+            setCurrencies(currenciesRes.data);
+        } catch (err) {
+            setErrorCurrencies(err.response?.data?.message || err.message || "Ошибка загрузки");
+            console.error(err);
+        } finally {
+            setLoadingCurrencies(false);
+        }
+    };
 
     useEffect(() => {
         loadAllCurrencies();
     }, []);
-
-
 
 
     //-> Поиск валюты по коду
@@ -129,7 +128,7 @@ function Dashboard() {
     };
 
 
-    //-> Поиск валюты по коду
+    //-> Поиск обменного курса по коду валютной пары
     const handleExchangeRatesLoadData = async () => {
         // Проверка, что поле не пустое
         if (!codesExchangeRate.trim()) {
@@ -148,7 +147,7 @@ function Dashboard() {
             setCodesExchangeRate("");
         } catch (err) {
             if (err.response?.status === 404) {
-                setErrorExchangeRates(`Валюта с кодом "${codeCurrency}" не найдена`);
+                setErrorExchangeRates(err.response?.data?.error);
                 setExchangeRates([]);
             } else {
                 setErrorExchangeRates(err.response?.data?.message || "Не удалось загрузить данные");
@@ -166,6 +165,7 @@ function Dashboard() {
 
 
     const resetSearchExchangeRates = () => {
+        setCodesExchangeRate("")
         setExchangeRates("");
         setErrorExchangeRates(null);
         loadAllExchangeRates();
@@ -180,7 +180,7 @@ function Dashboard() {
 
     return (
         <Box>
-            <Grid container width={"xl"}>
+            <Grid container width={"md"}>
                 <Grid size={12}>
                     <Box>
                         <Typography
@@ -250,7 +250,8 @@ function Dashboard() {
 
                         <Box>
                             {errorNotFoundCurrencies &&
-                                <Alert severity="error">{errorNotFoundCurrencies}</Alert>
+                                <Alert variant={'filled'}
+                                       severity="error">{errorNotFoundCurrencies}</Alert>
                             }
                         </Box>
                     </Box>
@@ -283,7 +284,8 @@ function Dashboard() {
                     </Button>
                 </Box>
                 <Box>
-                    <ExchangeRatesCreateForm onSuccess={handleExchangeRatesCreated} />
+                    <ExchangeRatesCreateForm
+                        onSuccess={handleExchangeRatesCreated}/>
                 </Box>
                 <Box>
                     <Typography variant={'h2'} fontWeight={'bold'}
@@ -296,7 +298,7 @@ function Dashboard() {
                         value={codesExchangeRate}
                         onChange={handleInputChangeExchangeRates}
                         // onKeyPress={handleKeyPress}
-                        placeholder="Введите код валюты (например, USD)"
+                        placeholder="Введите код валютной пары (например, USDEUR)"
                         style={{
                             padding: "8px",
                             width: "200px",
@@ -320,6 +322,11 @@ function Dashboard() {
                             Сбросить поиск
                         </Button>
                     )}
+
+                </Box>
+                <Box mt={2} mb={2} height={50}>
+                    {errorExchangeRates && <Alert variant={'filled'}
+                                                  severity="error">{errorExchangeRates}</Alert>}
                 </Box>
                 <Box>
                     <ExchangeRates

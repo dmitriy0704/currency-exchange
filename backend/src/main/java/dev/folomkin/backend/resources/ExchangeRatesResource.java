@@ -48,10 +48,11 @@ public class ExchangeRatesResource {
     @Produces(MediaType.APPLICATION_JSON)
     public Response addExchangeRate(
             @FormParam("baseCurrencyCode") String baseCode,
-            @FormParam("targetCurrencyCode") String targetCode,
-            @FormParam("rate") BigDecimal rate) {
+            @FormParam("targetCurrencyCode") String targetCode
+//            @FormParam("rate") BigDecimal rate
+    ) {
         try {
-            ExchangeRate exchangeRate = service.createExchangeRates(baseCode, targetCode, rate);
+            ExchangeRate exchangeRate = service.createExchangeRates(baseCode, targetCode);
             return Response.status(201).entity(exchangeRate).build();
         } catch (SQLException e) {
             return Response.status(500).build();

@@ -3,9 +3,9 @@ import api from '../api/axios.js';
 import {Box, Button, Grid, Input, TextField, Typography} from "@mui/material"; // твой настроенный axios-инстанс
 
 function CurrencyExchange() {
-    const [from, setFrom] = useState('USD');        // Исходная валюта
-    const [to, setTo] = useState('EUR');            // Целевая валюта
-    const [amount, setAmount] = useState('1');      // Сумма для конвертации
+    const [from, setFrom] = useState(null);        // Исходная валюта
+    const [to, setTo] = useState(null);            // Целевая валюта
+    const [amount, setAmount] = useState('0');      // Сумма для конвертации
     const [result, setResult] = useState(null);     // Результат от сервера
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -35,8 +35,7 @@ function CurrencyExchange() {
             setResult(response.data);
         } catch (err) {
             setError(
-                err.response?.data?.message ||
-                'Не удалось выполнить конвертацию. Проверьте коды валют.'
+                err.response?.data?.error
             );
             console.error(err);
         } finally {
@@ -45,14 +44,16 @@ function CurrencyExchange() {
     };
 
     return (
-        <Box>
+        <Box mt={5}>
             <Grid container spacing={2} maxWidth={'xs'}>
                 <Grid size={12}>
-                    <Typography
-                        variant={'h2'}
-                        fontSize={18}
-                        fontWeight={'bold'}>
-                        Конвертер валют</Typography>
+                    <Box>
+                        <Typography
+                            variant={'h2'}
+                            fontSize={24}
+                            fontWeight={'bold'}>
+                            Конвертер валют</Typography>
+                    </Box>
                 </Grid>
 
 
@@ -63,13 +64,13 @@ function CurrencyExchange() {
 
                             <Grid container spacing={2}>
                                 <Grid size={12}>
-                                    <Box mb={2} mt={5}>
+                                    <Box mb={2} mt={2}>
                                         <TextField
                                             fullWidth={true}
-                                            type="text"
+                                            type="number"
                                             value={amount}
                                             onChange={(e) => setAmount(e.target.value)}
-                                            placeholder="Сумма Введите код валюты (например, USD)"
+                                            placeholder="Сумма"
                                             disabled={loading}
                                             required={true}
                                             label={"Сумма перевода"}

@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import api from '../api/axios.js';
 import qs from 'qs';
-import {Box, Button, Input, TextField, Typography} from "@mui/material";
+import {Alert, Box, Button, Input, TextField, Typography} from "@mui/material";
 
 function ExchangeRatesCreateForm({onSuccess}) {
     const [baseCode, setBaseCode] = useState('');
@@ -9,6 +9,7 @@ function ExchangeRatesCreateForm({onSuccess}) {
     // const [rate, setRate] = useState(0);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(null)
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -36,16 +37,18 @@ function ExchangeRatesCreateForm({onSuccess}) {
                 }
             );
 
-            // alert('Валюта создана!');
+            setSuccess(true)
             setBaseCode('');
             setTargetCode('');
             // setRate(0)
 
             // Если нужно обновить список
             if (onSuccess) onSuccess();
-
+            setTimeout(() => {
+                setSuccess(false);
+            }, 2000);
         } catch (err) {
-            setError(err.response?.data?.message || 'Не удалось создать валюту');
+            setError(err.response?.data?.error);
         } finally {
             setLoading(false);
         }
@@ -88,12 +91,15 @@ function ExchangeRatesCreateForm({onSuccess}) {
 
                     />
                 </Box>
-                <Box>
-                    <Typography variant={'body1'}>
+                <Box maxWidth={350} ml={'auto'} mr={'auto'} mt={2} mb={3}>
+
+                    <Alert variant={'filled'} severity="info">
                         Обменный курс высчитывается <br/>
                         автоматически как кросс-курс на <br/>
                         основании отношения курса валют к курсу
-                        рубля</Typography>
+                        рубля
+                    </Alert>
+
                 </Box>
 
                 {/*<Box pb={2}>*/}
@@ -109,18 +115,25 @@ function ExchangeRatesCreateForm({onSuccess}) {
                 {/*    />*/}
                 {/*</Box>*/}
 
+                <Box>
+                    <Button
+                        fullWidth={true}
+                        variant={'contained'}
+                        type="submit"
+                        disabled={loading || !baseCode.trim() || !targetCode.trim()}
+                        style={{padding: '10px 20px'}}
+                    >
+                        {loading ? 'Создаётся...' : 'Создать курс обмена'}
+                    </Button>
+                </Box>
 
-                {error && <p style={{color: 'red'}}>{error}</p>}
-
-                <Button
-                    fullWidth={true}
-                    variant={'contained'}
-                    type="submit"
-                    disabled={loading || !baseCode.trim() || !targetCode.trim()}
-                    style={{padding: '10px 20px'}}
-                >
-                    {loading ? 'Создаётся...' : 'Создать курс обмена'}
-                </Button>
+                <Box mt={2} mb={2} height={50}>
+                    {success &&
+                        <Alert variant={'filled'} severity="success">Валюта
+                            создана</Alert>}
+                    {error && <Alert variant={'filled'}
+                                     severity="error">{error}</Alert>}
+                </Box>
             </form>
         </Box>
     );

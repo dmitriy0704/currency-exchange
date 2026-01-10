@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import ReactJsonView from '@microlink/react-json-view'
 
 // import api from '../api/axios';
-import {Box, Grid, Paper, Typography} from "@mui/material";
+import {Alert, Box, Grid, Paper, Typography} from "@mui/material";
 import {DataGrid} from '@mui/x-data-grid';
 
 
@@ -85,11 +85,14 @@ const columns = [
 const paginationModel = {page: 0, pageSize: 5};
 
 
-function ExchangeRates({exchangeRates, loadingExchangeRates, errorExchangeRates}) {
+function ExchangeRates({exchangeRates, loadingExchangeRates}) {
     if (loadingExchangeRates) return <p>Загрузка списка курсов обмена валют...</p>;
-    if (!exchangeRates || exchangeRates.length === 0) return <p>Список курсов обмена валют не загружен</p>;
     if (loadingExchangeRates) return <p>Загрузка...</p>;
-    if (errorExchangeRates) return <p>Ошибка: {errorExchangeRates}</p>;
+    // if (errorExchangeRates) return <p>Ошибка: {errorExchangeRates}</p>;
+
+
+    if (!exchangeRates || exchangeRates.length === 0) return <Alert variant={'filled'} severity="info" height={'50px'}>Список курсов обмена валют не загружен</Alert>;
+
 
     return (
         <Box>

@@ -62,7 +62,10 @@ public class CurrencyResource {
     ) {
         try {
             Currency currency = currenciesService.createCurrency(name, code, rub_rate, sign);
-            return Response.status(201).entity(currency).build();
+            return Response
+                    .status(201)
+                    .entity(currency)
+                    .build();
         } catch (IllegalArgumentException e) {
             return Response.status(400).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
         } catch (ConflictException e) {

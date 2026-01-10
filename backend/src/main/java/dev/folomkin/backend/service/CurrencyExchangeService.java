@@ -1,20 +1,19 @@
 package dev.folomkin.backend.service;
 
 import dev.folomkin.backend.model.ConversionResultDto;
-import dev.folomkin.backend.repository.CurrencyExchangeRepository;
+import dev.folomkin.backend.repository.ExchangeRatesRepository;
 
 import java.math.BigDecimal;
 
 public class CurrencyExchangeService {
 
-    private final CurrencyExchangeRepository repository;
+    private final ExchangeRatesRepository repository;
 
-    public CurrencyExchangeService(CurrencyExchangeRepository repository) {
+    public CurrencyExchangeService(ExchangeRatesRepository repository) {
         this.repository = repository;
     }
 
-    public ConversionResultDto calcCurrencyExchange(
-            String fromCode, String toCode, BigDecimal amount) {
-        return repository.calcCurrencyExchange(fromCode, toCode, amount);
+    public ConversionResultDto convertCurrency(String fromCode, String toCode, BigDecimal amount) {
+        return repository.convertCurrency(fromCode, toCode, amount);
     }
 }

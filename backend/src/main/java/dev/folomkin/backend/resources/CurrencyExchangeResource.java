@@ -2,7 +2,7 @@ package dev.folomkin.backend.resources;
 
 
 import dev.folomkin.backend.model.ConversionResultDto;
-import dev.folomkin.backend.repository.CurrencyExchangeRepository;
+import dev.folomkin.backend.repository.ExchangeRatesRepository;
 import dev.folomkin.backend.service.CurrencyExchangeService;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.ServletContext;
@@ -28,7 +28,7 @@ public class CurrencyExchangeResource {
 
     @PostConstruct
     public void init() {
-        CurrencyExchangeRepository repository = new CurrencyExchangeRepository(context);
+        ExchangeRatesRepository repository = new ExchangeRatesRepository(context);
         this.service = new CurrencyExchangeService(repository);
     }
 
@@ -63,7 +63,7 @@ public class CurrencyExchangeResource {
         }
 
         ConversionResultDto conversionResultDto =
-                service.calcCurrencyExchange(fromCode, toCode, amount);
+                service.convertCurrency(fromCode, toCode, amount);
 
         return Response.ok(conversionResultDto).build();
 

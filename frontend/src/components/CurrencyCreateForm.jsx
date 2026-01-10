@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import api from '../api/axios.js';
 import qs from 'qs';
-import {Box, Button, Input, TextField, Typography} from "@mui/material";
+import {Alert, Box, Button, Input, TextField, Typography} from "@mui/material";
 
 function CurrencyCreateForm({onSuccess}) {
     const [name, setName] = useState('');
@@ -10,6 +10,7 @@ function CurrencyCreateForm({onSuccess}) {
     const [sign, setSign] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(null)
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -37,18 +38,21 @@ function CurrencyCreateForm({onSuccess}) {
                     },
                 }
             );
-
-            // alert('Валюта создана!');
+            setSuccess(true);
             setName('');
             setCode('');
             setRub_rate(0)
             setSign('')
 
+
             // Если нужно обновить список
             if (onSuccess) onSuccess();
 
+            setTimeout(() => {
+                setSuccess(false);
+            }, 2000);
         } catch (err) {
-            setError(err.response?.data?.message || 'Не удалось создать валюту');
+            setError(err.response?.data?.error);
         } finally {
             setLoading(false);
         }
@@ -73,7 +77,7 @@ function CurrencyCreateForm({onSuccess}) {
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Например: Доллар США"
                         disabled={loading}
-                            label={'Национальность валюты'}
+                        label={'Национальность валюты'}
 
                     />
                 </Box>
@@ -88,7 +92,6 @@ function CurrencyCreateForm({onSuccess}) {
                         maxLength="3"
                         disabled={loading}
                         label={'Код валюты'}
-
                     />
                 </Box>
 
@@ -120,17 +123,22 @@ function CurrencyCreateForm({onSuccess}) {
                     />
                 </Box>
 
-                {error && <p style={{color: 'red'}}>{error}</p>}
-
                 <Button
                     fullWidth={true}
                     variant={'contained'}
                     type="submit"
-                    disabled={loading || !name.trim() || !code.trim()}
+                    disabled={loading || !name.trim() || !code.trim()|| !rub_rate || !sign}
                     style={{padding: '10px 20px'}}
                 >
                     {loading ? 'Создаётся...' : 'Создать валюту'}
                 </Button>
+
+                <Box mt={2} mb={2} height={50}>
+                    {success &&
+                        <Alert variant={'filled'} severity="success">Валюта создана</Alert>}
+                    {error && <Alert variant={'filled'} severity="error">{error}</Alert>}
+                </Box>
+
             </form>
         </Box>
     );
