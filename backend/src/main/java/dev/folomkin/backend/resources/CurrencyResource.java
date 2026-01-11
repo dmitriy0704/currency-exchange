@@ -1,6 +1,7 @@
 package dev.folomkin.backend.resources;
 
 import dev.folomkin.backend.exception.ConflictException;
+import dev.folomkin.backend.model.CreateCurrencyRequestDto;
 import dev.folomkin.backend.model.Currency;
 import dev.folomkin.backend.model.User;
 import dev.folomkin.backend.repository.CurrenciesRepository;
@@ -61,7 +62,9 @@ public class CurrencyResource {
             @FormParam("sign") String sign
     ) {
         try {
-            Currency currency = currenciesService.createCurrency(name, code, rub_rate, sign);
+
+            CreateCurrencyRequestDto request = new CreateCurrencyRequestDto(name, code, rub_rate, sign);
+            Currency currency = currenciesService.createCurrency(request);
             return Response
                     .status(201)
                     .entity(currency)

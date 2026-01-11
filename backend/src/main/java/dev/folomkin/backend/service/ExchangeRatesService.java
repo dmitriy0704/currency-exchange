@@ -3,6 +3,7 @@ package dev.folomkin.backend.service;
 import dev.folomkin.backend.exception.AlreadyExistsException;
 import dev.folomkin.backend.exception.NotFoundException;
 import dev.folomkin.backend.exception.ValidationException;
+import dev.folomkin.backend.model.CreateExchangeRatesDto;
 import dev.folomkin.backend.model.Currency;
 import dev.folomkin.backend.model.ExchangeRate;
 import dev.folomkin.backend.repository.CurrenciesRepository;
@@ -40,27 +41,27 @@ public class ExchangeRatesService {
     }
 
 
-    public ExchangeRate createExchangeRates(String baseCode, String targetCode) throws SQLException {
+    public ExchangeRate createExchangeRates(CreateExchangeRatesDto ratesDto) throws SQLException {
 
 
-        if (baseCode == null || baseCode.trim().isEmpty() || baseCode.length() != 3) {
+        if (ratesDto.getBaseCode() == null || ratesDto.getBaseCode().trim().isEmpty() || ratesDto.getBaseCode().length() != 3) {
             throw new ValidationException("Код базовой валюты должен состоять из 3 букв");
         }
-        if (targetCode == null || targetCode.trim().isEmpty() || targetCode.length() != 3) {
+        if (ratesDto.getTargetCode() == null || ratesDto.getTargetCode().trim().isEmpty() || ratesDto.getTargetCode().length() != 3) {
             throw new ValidationException("Код целевой валюты должен состоять из 3 букв");
         }
 //        if (rate == null || rate.compareTo(BigDecimal.ZERO) <= 0) {
 //            throw new ValidationException("Курс должен быть положительным числом");
 //        }
-        if (baseCode.equalsIgnoreCase(targetCode)) {
+        if (ratesDto.getBaseCode().equalsIgnoreCase(ratesDto.getTargetCode())) {
             throw new ValidationException("Базовая и целевая валюты не могут быть одинаковыми");
         }
 
         try {
-            repository.findByCodes(baseCode, targetCode);
+            repository.findByCodes(ratesDto.getBaseCode(), ratesDto.getTargetCode());
             throw new AlreadyExistsException("Обменный курс уже существует");
         } catch (NotFoundException e) {
-            return repository.save(baseCode, targetCode);
+            return repository.save(ratesDto.getBaseCode(), ratesDto.getTargetCode());
 
         }
 

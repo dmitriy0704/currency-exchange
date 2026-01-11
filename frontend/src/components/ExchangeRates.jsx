@@ -109,7 +109,7 @@ function ExchangeRates({exchangeRates, loadingExchangeRates}) {
                         <Paper sx={{
                             maxHeight: 400,
                             width: '100%',
-                            border: '1px solid #cccccc'
+                            border: '1px solid #aaa'
                         }}>
                             <DataGrid
                                 label={'LABEL'}
@@ -117,7 +117,7 @@ function ExchangeRates({exchangeRates, loadingExchangeRates}) {
                                 columns={columns}
                                 initialState={{pagination: {paginationModel}}}
                                 pageSizeOptions={[5, 10]}
-                                checkboxSelection
+                                checkboxSelection={false}
                                 sx={{border: 0}}
                             />
                         </Paper>

@@ -3,6 +3,7 @@ package dev.folomkin.backend.service;
 import dev.folomkin.backend.exception.AlreadyExistsException;
 import dev.folomkin.backend.exception.ConflictException;
 import dev.folomkin.backend.exception.NotFoundException;
+import dev.folomkin.backend.model.CreateCurrencyRequestDto;
 import dev.folomkin.backend.model.Currency;
 import dev.folomkin.backend.repository.CurrenciesRepository;
 import jakarta.ws.rs.core.Response;
@@ -28,18 +29,18 @@ public class CurrenciesService {
     }
 
 
-    public Currency createCurrency(String name, String code, BigDecimal rub_rate, String sign) throws SQLException {
-        Currency currency = null;
-        if (name == null || name.trim().isEmpty()) {
+    public Currency createCurrency(CreateCurrencyRequestDto requestDto) throws SQLException {
+        if (requestDto.getName() == null || requestDto.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("Национальность валюты обязательна");
         }
-        if (code == null || code.trim().isEmpty()) {
+        if (requestDto.getCode() == null || requestDto.getCode().trim().isEmpty()) {
             throw new IllegalArgumentException("Код валюты обязателен");
         }
 
-        String normalizedCode = code.trim().toUpperCase();
-        String normalizedName = name.trim();
-        String normalizedSign = sign.trim();
+        String normalizedCode = requestDto.getCode().trim().toUpperCase();
+        String normalizedName = requestDto.getName().trim();
+        String normalizedSign = requestDto.getSign().trim();
+        BigDecimal rubRate = requestDto.getRub_rate();
 
         try {
             // Пытаемся найти валюту по коду
@@ -50,7 +51,7 @@ public class CurrenciesService {
 
         } catch (NotFoundException e) {
             // Валюты нет — можно создавать новую
-            return currenciesRepository.save(normalizedName, normalizedCode, rub_rate, normalizedSign);
+            return currenciesRepository.save(normalizedName, normalizedCode, rubRate, normalizedSign);
         }
     }
 }

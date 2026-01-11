@@ -61,7 +61,7 @@ function Currencies({currencies, loading, error, isSearching}) {
                         <Paper sx={{
                             maxHeight: 400,
                             width: '100%',
-                            border: '1px solid #cccccc'
+                            border: '1px solid #aaa'
                         }}>
                             <DataGrid
                                 label={'LABEL'}
@@ -69,7 +69,7 @@ function Currencies({currencies, loading, error, isSearching}) {
                                 columns={columns}
                                 initialState={{pagination: {paginationModel}}}
                                 pageSizeOptions={[5, 10]}
-                                checkboxSelection
+                                checkboxSelection={false}
                                 sx={{border: 0}}
                             />
                         </Paper>
@@ -94,13 +94,8 @@ function Currencies({currencies, loading, error, isSearching}) {
                 {/*    </Box>*/}
                 {/*</Grid>*/}
             </Grid>
-
-
         </Box>
-
-    )
-        ;
-
+    );
 }
 
 export default Currencies;

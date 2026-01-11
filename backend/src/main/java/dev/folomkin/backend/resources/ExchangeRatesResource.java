@@ -1,5 +1,6 @@
 package dev.folomkin.backend.resources;
 
+import dev.folomkin.backend.model.CreateExchangeRatesDto;
 import dev.folomkin.backend.model.ExchangeRate;
 import dev.folomkin.backend.repository.CurrenciesRepository;
 import dev.folomkin.backend.repository.ExchangeRatesRepository;
@@ -52,7 +53,10 @@ public class ExchangeRatesResource {
 //            @FormParam("rate") BigDecimal rate
     ) {
         try {
-            ExchangeRate exchangeRate = service.createExchangeRates(baseCode, targetCode);
+
+            CreateExchangeRatesDto  ratesDto = new CreateExchangeRatesDto(baseCode, targetCode);
+
+            ExchangeRate exchangeRate = service.createExchangeRates(ratesDto);
             return Response.status(201).entity(exchangeRate).build();
         } catch (SQLException e) {
             return Response.status(500).build();

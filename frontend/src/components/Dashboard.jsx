@@ -203,7 +203,9 @@ function Dashboard() {
                              border: '1px solid #aaa'
                          }}>
                         <Box p={2}
-                             sx={{backgroundColor: '#3d5afe'}}>
+                             sx={{
+                                 backgroundColor: '#3d5afe'
+                             }}>
                             <Typography
                                 component={'h2'}
                                 textAlign={'left'}
@@ -279,7 +281,10 @@ function Dashboard() {
                     </Box>
                 </Grid>
                 <Grid size={5}>
-                    <Box mt={2} sx={{backgroundColor: '#fff'}}>
+                    <Box mt={2} sx={{
+                        backgroundColor: '#fff',
+                        border: '1px solid #aaa'
+                    }}>
                         <Box p={2}
                              sx={{backgroundColor: '#3d5afe'}}>
                             <Typography
