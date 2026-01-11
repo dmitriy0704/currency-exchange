@@ -60,14 +60,6 @@ function CurrencyCreateForm({onSuccess}) {
 
     return (
         <Box mb={2} mt={3}>
-            <Typography
-                mt={3}
-                mb={2}
-                variant={'h3'}
-                fontSize={18}
-                fontWeight={'bold'}>
-                Создать новую валюту
-            </Typography>
             <form onSubmit={handleSubmit}>
                 <Box pb={2}>
                     <TextField
@@ -105,7 +97,7 @@ function CurrencyCreateForm({onSuccess}) {
                         placeholder="Например: 100.0"
                         maxLength="10"
                         disabled={loading}
-                        label={'Отношение к рублю(double)'}
+                        label={'Курс рубля(double)'}
                     />
                 </Box>
 
@@ -118,13 +110,11 @@ function CurrencyCreateForm({onSuccess}) {
                         placeholder="Например: $"
                         maxLength="3"
                         disabled={loading}
-                        label={'Sign валюты'}
-
+                        label={'Знак валюты'}
                     />
                 </Box>
 
                 <Button
-                    fullWidth={true}
                     variant={'contained'}
                     type="submit"
                     disabled={loading || !name.trim() || !code.trim()|| !rub_rate || !sign}

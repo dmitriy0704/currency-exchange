@@ -1,11 +1,19 @@
 import React, {useState} from 'react';
 import api from '../api/axios.js';
-import {Box, Button, Grid, Input, TextField, Typography} from "@mui/material"; // твой настроенный axios-инстанс
+import {
+    Alert,
+    Box,
+    Button,
+    Grid,
+    Input,
+    TextField,
+    Typography
+} from "@mui/material"; // твой настроенный axios-инстанс
 
 function CurrencyExchange() {
     const [from, setFrom] = useState(null);        // Исходная валюта
     const [to, setTo] = useState(null);            // Целевая валюта
-    const [amount, setAmount] = useState('0');      // Сумма для конвертации
+    const [amount, setAmount] = useState(0);      // Сумма для конвертации
     const [result, setResult] = useState(null);     // Результат от сервера
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -44,24 +52,27 @@ function CurrencyExchange() {
     };
 
     return (
-        <Box mt={5}>
-            <Grid container spacing={2} maxWidth={'xs'}>
+        <Box mb={2} mt={3}>
+
+            <Grid container>
+
                 <Grid size={12}>
-                    <Box>
+                    <Box p={2}
+                         sx={{backgroundColor: '#3d5afe'}}>
                         <Typography
-                            variant={'h2'}
-                            fontSize={24}
-                            fontWeight={'bold'}>
-                            Конвертер валют</Typography>
+                            component={'h2'}
+                            textAlign={'left'}
+                            fontSize={18}
+                            color={'#fff'}
+                        >Конвертер валют
+                        </Typography>
                     </Box>
                 </Grid>
-
-
+            </Grid>
+            <Grid container spacing={2} maxWidth={'xs'}>
                 <Grid size={12}>
-
-                    <Box>
+                    <Box p={2}>
                         <form onSubmit={handleExchange}>
-
                             <Grid container spacing={2}>
                                 <Grid size={12}>
                                     <Box mb={2} mt={2}>
@@ -116,7 +127,7 @@ function CurrencyExchange() {
                                         fullWidth={true}
                                         variant={'contained'}
                                         type="submit"
-                                        disabled={loading}
+                                        disabled={loading || !from || !to}
                                     >
                                         {loading ? 'Конвертируем...' : 'Конвертировать'}
                                     </Button>
@@ -126,40 +137,48 @@ function CurrencyExchange() {
                     </Box>
 
                 </Grid>
+                <Grid size={12}>
+                    <Box p={2}>
+                        {error &&
+                            <Alert variant={'filled'}
+                                   severity={'error'}>{error}</Alert>}
+                    </Box>
+                    <Box>
+                        {result && (
+                            <Box pb={3}>
+                                <Typography
+                                    variant={"h3"}
+                                    fontSize={18}
+                                    fontWeight={'bold'}>
+                                    Результат конвертации:</Typography>
+                                <Box>
+                                    <strong>{result.amount.toFixed(2)} {result.baseCurrency.sign} ({result.baseCurrency.code})</strong>
+                                    {' → '}
+                                    <strong>{result.convertedAmount.toFixed(2)} {result.targetCurrency.sign} ({result.targetCurrency.code})</strong>
+                                </Box>
+                                <Box>
+                                    Курс:
+                                    1 {result.baseCurrency.code} = <strong>{result.rate.toFixed(4)}</strong> {result.targetCurrency.code}
+                                </Box>
+                                <Box style={{
+                                    fontSize: '14px',
+                                    color: '#555',
+                                    marginTop: '10px'
+                                }}>
+                                    <Box>{result.baseCurrency.name}</Box>
+                                    <Box>{result.targetCurrency.name}</Box>
+                                </Box>
+                            </Box>
+                        )}
+                    </Box>
+
+
+                </Grid>
 
 
             </Grid>
 
 
-            {error && <p style={{color: 'red', marginTop: '15px'}}>{error}</p>}
-
-            {result && (
-                <div style={{
-                    marginTop: '25px',
-                    padding: '15px',
-                    background: '#f8f9fa',
-                    borderRadius: '8px'
-                }}>
-                    <h3>Результат конвертации:</h3>
-                    <p>
-                        <strong>{result.amount.toFixed(2)} {result.baseCurrency.sign} ({result.baseCurrency.code})</strong>
-                        {' → '}
-                        <strong>{result.convertedAmount.toFixed(2)} {result.targetCurrency.sign} ({result.targetCurrency.code})</strong>
-                    </p>
-                    <p>
-                        Курс:
-                        1 {result.baseCurrency.code} = <strong>{result.rate.toFixed(4)}</strong> {result.targetCurrency.code}
-                    </p>
-                    <div style={{
-                        fontSize: '14px',
-                        color: '#555',
-                        marginTop: '10px'
-                    }}>
-                        <p>{result.baseCurrency.name}</p>
-                        <p>{result.targetCurrency.name}</p>
-                    </div>
-                </div>
-            )}
         </Box>
     );
 }

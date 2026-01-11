@@ -6,7 +6,6 @@ import {Alert, Box, Grid, Paper, Typography} from "@mui/material";
 import {DataGrid} from '@mui/x-data-grid';
 
 
-
 const columns = [
     {field: 'id', headerName: 'ID', width: 70},
     {field: 'rate', headerName: 'Курс обмена валют', width: 150},
@@ -39,10 +38,10 @@ const columns = [
     },
     {
         field: 'baseCurrency-rub_curr',
-        headerName: 'Курс базовой валюты',
+        headerName: 'Курс базовой валюты(руб.)',
         description: 'description.',
         sortable: false,
-        width: 170,
+        width: 220,
         valueGetter: (value, row) => `${row.baseCurrency?.rub_rate || ''}`,
     },
     {
@@ -74,10 +73,10 @@ const columns = [
     },
     {
         field: 'targetCurrency-rub_rate',
-        headerName: 'Курс целевой валюты',
+        headerName: 'Курс целевой валюты(руб.)',
         description: 'description.',
         sortable: false,
-        width: 170,
+        width: 220,
         valueGetter: (value, row) => `${row.targetCurrency?.rub_rate || ''}`,
     },
 ];
@@ -86,28 +85,25 @@ const paginationModel = {page: 0, pageSize: 5};
 
 
 function ExchangeRates({exchangeRates, loadingExchangeRates}) {
-    if (loadingExchangeRates) return <p>Загрузка списка курсов обмена валют...</p>;
+    if (loadingExchangeRates) return <p>Загрузка списка курсов обмена
+        валют...</p>;
     if (loadingExchangeRates) return <p>Загрузка...</p>;
     // if (errorExchangeRates) return <p>Ошибка: {errorExchangeRates}</p>;
 
 
-    if (!exchangeRates || exchangeRates.length === 0) return <Alert variant={'filled'} severity="info" height={'50px'}>Список курсов обмена валют не загружен</Alert>;
+    if (!exchangeRates || exchangeRates.length === 0)
+        return <Box m={2}>
+            <Alert
+                variant={'filled'}
+                severity="info"
+                height={'50px'}>Нет данных для загрузки</Alert>
+        </Box>
 
 
     return (
         <Box>
             <Grid container>
-
-                {/*<Grid size={12}>*/}
-                {/*    <Box>*/}
-                {/*        <Typography variant={'h2'} fontWeight={'bold'}*/}
-                {/*                    fontSize={18} mt={4} mb={2}>*/}
-                {/*            Обменные курсы валют*/}
-                {/*        </Typography>*/}
-                {/*    </Box>*/}
-                {/*</Grid>*/}
-
-                <Grid size={8} p={2}>
+                <Grid size={12} p={2}>
 
                     <Box>
                         <Paper sx={{
@@ -127,24 +123,24 @@ function ExchangeRates({exchangeRates, loadingExchangeRates}) {
                         </Paper>
                     </Box>
                 </Grid>
-                <Grid size={4} p={2}>
-                    <Box>
-                        <Box sx={{textAlign: 'left'}}>
-                            <ReactJsonView
-                                src={exchangeRates}
-                                theme="rjv-default"
-                                displayObjectSize={true}
-                                collapsed={false}
-                                style={{
-                                    maxHeight: 370,
-                                    overflow: "auto",
-                                    fontSize: 14,
-                                    border: '1px solid #cccccc'
-                                }}
-                            />
-                        </Box>
-                    </Box>
-                </Grid>
+                {/*<Grid size={4} p={2}>*/}
+                {/*    <Box>*/}
+                {/*        <Box sx={{textAlign: 'left'}}>*/}
+                {/*            <ReactJsonView*/}
+                {/*                src={exchangeRates}*/}
+                {/*                theme="rjv-default"*/}
+                {/*                displayObjectSize={true}*/}
+                {/*                collapsed={false}*/}
+                {/*                style={{*/}
+                {/*                    maxHeight: 370,*/}
+                {/*                    overflow: "auto",*/}
+                {/*                    fontSize: 14,*/}
+                {/*                    border: '1px solid #cccccc'*/}
+                {/*                }}*/}
+                {/*            />*/}
+                {/*        </Box>*/}
+                {/*    </Box>*/}
+                {/*</Grid>*/}
             </Grid>
         </Box>
     );

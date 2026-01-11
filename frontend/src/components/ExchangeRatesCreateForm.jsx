@@ -46,7 +46,7 @@ function ExchangeRatesCreateForm({onSuccess}) {
             if (onSuccess) onSuccess();
             setTimeout(() => {
                 setSuccess(false);
-            }, 2000);
+            }, 2500);
         } catch (err) {
             setError(err.response?.data?.error);
         } finally {
@@ -56,85 +56,90 @@ function ExchangeRatesCreateForm({onSuccess}) {
 
     return (
         <Box mb={2} mt={3}>
-            <Typography
-                mt={3}
-                mb={2}
-                variant={'h3'}
-                fontSize={18}
-                fontWeight={'bold'}>
-                Создать новый курс обмена
-            </Typography>
-            <form onSubmit={handleSubmit}>
-                <Box pb={2}>
-                    <TextField
-                        fullWidth={true}
-                        type="text"
-                        value={baseCode}
-                        onChange={(e) => setBaseCode(e.target.value)}
-                        placeholder="Например: USD"
-                        disabled={loading}
-                        label={'Код базовой валюты'}
-
-                    />
+                <Box p={2}
+                     sx={{backgroundColor: '#3d5afe'}}>
+                    <Typography
+                        component={'h2'}
+                        textAlign={'left'}
+                        fontSize={18}
+                        color={'#fff'}
+                    >Добавить обменный курс
+                    </Typography>
                 </Box>
 
-                <Box pb={2}>
-                    <TextField
-                        fullWidth={true}
-                        type="text"
-                        value={targetCode}
-                        onChange={(e) => setTargetCode(e.target.value)}
-                        placeholder="Например: EUR"
-                        // maxLength="3"
-                        disabled={loading}
-                        label={'Код целевой валюты'}
+                <Box p={2}>
 
-                    />
+                    <form onSubmit={handleSubmit}>
+                        <Box pb={2}>
+                            <TextField
+                                fullWidth={true}
+                                type="text"
+                                value={baseCode}
+                                onChange={(e) => setBaseCode(e.target.value)}
+                                placeholder="Например: USD"
+                                disabled={loading}
+                                label={'Код базовой валюты'}
+
+                            />
+                        </Box>
+
+                        <Box pb={2}>
+                            <TextField
+                                fullWidth={true}
+                                type="text"
+                                value={targetCode}
+                                onChange={(e) => setTargetCode(e.target.value)}
+                                placeholder="Например: EUR"
+                                // maxLength="3"
+                                disabled={loading}
+                                label={'Код целевой валюты'}
+
+                            />
+                        </Box>
+                        <Box maxWidth={350} ml={'auto'} mr={'auto'} mt={2} mb={3}>
+
+                            <Alert variant={'filled'} severity="info">
+                                Обменный курс высчитывается <br/>
+                                автоматически как кросс-курс на <br/>
+                                основании отношения курса валют к курсу
+                                рубля
+                            </Alert>
+
+                        </Box>
+
+                        {/*<Box pb={2}>*/}
+                        {/*    <TextField*/}
+                        {/*        fullWidth={true}*/}
+                        {/*        type="number"*/}
+                        {/*        value={rate}*/}
+                        {/*        onChange={(e) => setRate(e.target.value)}*/}
+                        {/*        placeholder="Например: 100.0"*/}
+                        {/*        maxLength="10"*/}
+                        {/*        disabled={loading}*/}
+                        {/*        label={'Отношения валют(double)'}*/}
+                        {/*    />*/}
+                        {/*</Box>*/}
+
+                        <Box>
+                            <Button
+                                fullWidth={true}
+                                variant={'contained'}
+                                type="submit"
+                                disabled={loading || !baseCode.trim() || !targetCode.trim()}
+                            >
+                                {loading ? 'Создаётся...' : 'Создать курс обмена'}
+                            </Button>
+                        </Box>
+
+                        <Box mt={2} mb={2} height={50}>
+                            {success &&
+                                <Alert variant={'filled'} severity="success">Валюта
+                                    создана</Alert>}
+                            {error && <Alert variant={'filled'}
+                                             severity="error">{error}</Alert>}
+                        </Box>
+                    </form>
                 </Box>
-                <Box maxWidth={350} ml={'auto'} mr={'auto'} mt={2} mb={3}>
-
-                    <Alert variant={'filled'} severity="info">
-                        Обменный курс высчитывается <br/>
-                        автоматически как кросс-курс на <br/>
-                        основании отношения курса валют к курсу
-                        рубля
-                    </Alert>
-
-                </Box>
-
-                {/*<Box pb={2}>*/}
-                {/*    <TextField*/}
-                {/*        fullWidth={true}*/}
-                {/*        type="number"*/}
-                {/*        value={rate}*/}
-                {/*        onChange={(e) => setRate(e.target.value)}*/}
-                {/*        placeholder="Например: 100.0"*/}
-                {/*        maxLength="10"*/}
-                {/*        disabled={loading}*/}
-                {/*        label={'Отношения валют(double)'}*/}
-                {/*    />*/}
-                {/*</Box>*/}
-
-                <Box>
-                    <Button
-                        fullWidth={true}
-                        variant={'contained'}
-                        type="submit"
-                        disabled={loading || !baseCode.trim() || !targetCode.trim()}
-                        style={{padding: '10px 20px'}}
-                    >
-                        {loading ? 'Создаётся...' : 'Создать курс обмена'}
-                    </Button>
-                </Box>
-
-                <Box mt={2} mb={2} height={50}>
-                    {success &&
-                        <Alert variant={'filled'} severity="success">Валюта
-                            создана</Alert>}
-                    {error && <Alert variant={'filled'}
-                                     severity="error">{error}</Alert>}
-                </Box>
-            </form>
         </Box>
     );
 }
