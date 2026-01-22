@@ -30,19 +30,12 @@ const paginationModel = {page: 0, pageSize: 5};
 
 function Currencies({currencies, loading, error, isSearching}) {
     if (loading) return <p>Загрузка списка валют...</p>;
-    if (!currencies || currencies.length === 0) return <p>Список валют не загружен</p>;
+    if (!currencies || currencies.length === 0) return <Typography variant={'body1'}>Список валют не загружен</Typography>;
     if (loading) return <p>Загрузка...</p>;
     if (error) return <p>Ошибка: {error}</p>;
 
 
     return (
-
-        <Box>
-            {/*<ul>*/}
-            {/*    {currencies.map((currency) => (*/}
-            {/*        <li key={currency.id}>{currency.code}&nbsp;{currency.name}&nbsp;{currency.rub_rate}</li>*/}
-            {/*    ))}*/}
-            {/*</ul>*/}
 
             <Grid container>
                 <Grid size={12}>
@@ -56,8 +49,8 @@ function Currencies({currencies, loading, error, isSearching}) {
                         </Box>
                     )}
                 </Grid>
-                <Grid size={12} p={2}>
-                    <Box>
+                <Grid size={12}>
+                    <Box className={"currencies-table"}>
                         <Paper sx={{
                             maxHeight: 400,
                             width: '100%',
@@ -94,7 +87,6 @@ function Currencies({currencies, loading, error, isSearching}) {
                 {/*    </Box>*/}
                 {/*</Grid>*/}
             </Grid>
-        </Box>
     );
 }
 

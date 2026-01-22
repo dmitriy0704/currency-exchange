@@ -12,14 +12,20 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
+
 
 @Path("/currency")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 public class CurrencyResource {
+
+    private static final Logger log = LoggerFactory.getLogger(CurrencyResource.class);
+
 
     @Context
     private ServletContext context;
@@ -36,20 +42,29 @@ public class CurrencyResource {
     @Path("/{code}")
     public Response getCurrencyByCode(@PathParam("code") String code) {
 
-        // Валидация кода (опционально, но рекомендуется)
-        if (code == null || code.trim().isEmpty()) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity("{\"error\": \"Код валюты не валиден\"}")
-                    .build();
-        }
-
-        code = code.trim().toUpperCase();  // обычно коды хранятся в верхнем регистре
-
+        log.info("Code: {}", code);
+        String normalizedCode = code.trim().toUpperCase();
         try {
-            return Response.ok(currenciesService.getCurrencyByCode(code)).build();
+            Currency currency = currenciesService.getCurrencyByCode(normalizedCode);
+            return Response.ok(currency).build();  // 200 OK
+
+        } catch (NotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND)
+                    .entity("{\"error\": \"Валюта с кодом '" + normalizedCode + "' не найдена\"}")
+                    .type(MediaType.APPLICATION_JSON)
+                    .build();
+
         } catch (SQLException e) {
             return Response.status(500).build();
         }
+    }
+
+    @GET
+    @Path("")
+    public Response getCurrencyWithoutCode() {
+        return Response.status(Response.Status.BAD_REQUEST)
+                .entity("{\"error\": \"Код валюты не должен быть пустым\"}")
+                .build();
     }
 
     @POST
@@ -62,6 +77,8 @@ public class CurrencyResource {
             @FormParam("sign") String sign
     ) {
         try {
+
+            /// Наличие параметров формы проверяется на фронте.
 
             CreateCurrencyRequestDto request = new CreateCurrencyRequestDto(name, code, rub_rate, sign);
             Currency currency = currenciesService.createCurrency(request);

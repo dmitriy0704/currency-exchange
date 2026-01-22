@@ -54,32 +54,32 @@ public class DatabaseInitializer implements ServletContextListener {
             try (Connection conn = DriverManager.getConnection(url)) {
                 System.out.println("Подключение успешно! Файл БД должен быть создан.");
 
-                try (Statement stmt = conn.createStatement()) {
-                    stmt.execute("""
-                            CREATE TABLE IF NOT EXISTS users (
-                                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                                name TEXT NOT NULL,
-                                email TEXT UNIQUE NOT NULL
-                            )
-                            """);
-                    System.out.println("Таблица users создана/проверена.");
-                }
+//                try (Statement stmt = conn.createStatement()) {
+//                    stmt.execute("""
+//                            CREATE TABLE IF NOT EXISTS users (
+//                                id INTEGER PRIMARY KEY AUTOINCREMENT,
+//                                name TEXT NOT NULL,
+//                                email TEXT UNIQUE NOT NULL
+//                            )
+//                            """);
+//                    System.out.println("Таблица users создана/проверена.");
+//                }
 
-                try (Statement stmt = conn.createStatement()) {
-                    stmt.execute("""
-                            CREATE TABLE IF NOT EXISTS currency_rates
-                            (
-                                code     TEXT PRIMARY KEY,
-                                id       TEXT,
-                                num_code TEXT,
-                                nominal  INTEGER,
-                                name     TEXT,
-                                value    REAL,
-                                previous REAL
-                            );
-                            """);
-                    System.out.println("Таблица currency_rates создана/проверена.");
-                }
+//                try (Statement stmt = conn.createStatement()) {
+//                    stmt.execute("""
+//                            CREATE TABLE IF NOT EXISTS currency_rates
+//                            (
+//                                code     TEXT PRIMARY KEY,
+//                                id       TEXT,
+//                                num_code TEXT,
+//                                nominal  INTEGER,
+//                                name     TEXT,
+//                                value    REAL,
+//                                previous REAL
+//                            );
+//                            """);
+//                    System.out.println("Таблица currency_rates создана/проверена.");
+//                }
 
                 try (Statement stmt = conn.createStatement()) {
                     stmt.execute("""
@@ -94,34 +94,34 @@ public class DatabaseInitializer implements ServletContextListener {
                             """);
                     System.out.println("Таблица currencies создана/проверена.");
                 }
-//                try (Statement stmt = conn.createStatement()) {
-//                    stmt.execute("""
-//                            CREATE TABLE IF NOT EXISTS exchange_rates
-//                               (
-//                                   id                 INTEGER PRIMARY KEY AUTOINCREMENT,
-//                                   base_currency_id   INT            NOT NULL,
-//                                   target_currency_id INT            NOT NULL,
-//                                   rate               DECIMAL(10, 6) NOT NULL CHECK (rate >= 0),
-//
-//                                   -- Внешний ключ, связывающий exchangeRates с currencies
-//                                   CONSTRAINT base_currency
-//                                       FOREIGN KEY (base_currency_id)
-//                                           REFERENCES currencies (id)
-//                                           ON DELETE RESTRICT
-//                                           ON UPDATE CASCADE,
-//
-//                                   CONSTRAINT target_currency
-//                                       FOREIGN KEY (target_currency_id)
-//                                           REFERENCES currencies (id)
-//                                           ON DELETE RESTRICT
-//                                           ON UPDATE CASCADE
-//
-//
-//                               );
-//                            """);
-//                    System.out.println("Таблица exchange_rates создана/проверена.");
-//                    loadInitialCurrencies(conn);
-//                }
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.execute("""
+                            CREATE TABLE IF NOT EXISTS exchange_rates
+                               (
+                                   id                 INTEGER PRIMARY KEY AUTOINCREMENT,
+                                   base_currency_id   INT            NOT NULL,
+                                   target_currency_id INT            NOT NULL,
+                                   rate               DECIMAL(10, 6) NOT NULL CHECK (rate >= 0),
+
+                                   -- Внешний ключ, связывающий exchangeRates с currencies
+                                   CONSTRAINT base_currency
+                                       FOREIGN KEY (base_currency_id)
+                                           REFERENCES currencies (id)
+                                           ON DELETE RESTRICT
+                                           ON UPDATE CASCADE,
+
+                                   CONSTRAINT target_currency
+                                       FOREIGN KEY (target_currency_id)
+                                           REFERENCES currencies (id)
+                                           ON DELETE RESTRICT
+                                           ON UPDATE CASCADE
+
+
+                               );
+                            """);
+                    System.out.println("Таблица exchange_rates создана/проверена.");
+                    loadInitialCurrencies(conn);
+                }
             }
 
             // Проверяем наличие файла после подключения

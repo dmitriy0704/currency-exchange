@@ -55,7 +55,7 @@ function ExchangeRatesCreateForm({onSuccess}) {
     };
 
     return (
-        <Box mb={2} mt={3}>
+        <Box mb={2}>
                 <Box p={2}
                      sx={{backgroundColor: '#3d5afe'}}>
                     <Typography
@@ -122,7 +122,6 @@ function ExchangeRatesCreateForm({onSuccess}) {
 
                         <Box>
                             <Button
-                                fullWidth={true}
                                 variant={'contained'}
                                 type="submit"
                                 disabled={loading || !baseCode.trim() || !targetCode.trim()}
@@ -133,8 +132,9 @@ function ExchangeRatesCreateForm({onSuccess}) {
 
                         <Box mt={2} mb={2} height={50}>
                             {success &&
-                                <Alert variant={'filled'} severity="success">Валюта
-                                    создана</Alert>}
+                                <Alert
+                                    variant={'filled'}
+                                    severity="success">Курс обмена валют успешно создан</Alert>}
                             {error && <Alert variant={'filled'}
                                              severity="error">{error}</Alert>}
                         </Box>

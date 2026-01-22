@@ -53,8 +53,19 @@ public class ExchangeRateResource {
 
         try {
             return Response.ok(service.getExchangeRateByCodes(codes)).build();
+        } catch (IllegalArgumentException e) {
+            return Response.status(400).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+    }
+
+
+    @GET
+    @Path("")
+    public Response getExchangeRateWithoutCodes() {
+        return Response.status(Response.Status.BAD_REQUEST)
+                .entity("{\"error\": \"Код валютной пары не должны быть пустыми\"}")
+                .build();
     }
 }

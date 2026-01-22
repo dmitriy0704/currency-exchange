@@ -6,7 +6,7 @@ import {Alert, Box, Button, Input, TextField, Typography} from "@mui/material";
 function CurrencyCreateForm({onSuccess}) {
     const [name, setName] = useState('');
     const [code, setCode] = useState('');
-    const [rub_rate, setRub_rate] = useState(0);
+    const [rub_rate, setRub_rate] = useState(1);
     const [sign, setSign] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -17,6 +17,21 @@ function CurrencyCreateForm({onSuccess}) {
 
         if (!name.trim() || !code.trim()) {
             setError('Заполните оба поля');
+            return;
+        }
+
+        if (code.length > 3) {
+            setError('Код валюты должен содержать не более 3 символов');
+            return;
+        }
+
+        if (rub_rate <= 0) {
+            setError('Курс рубля должен быть больше 0');
+            return;
+        }
+
+        if (sign.length > 1) {
+            setError('Знак валюты не должен содержать более 1 символа');
             return;
         }
 
@@ -41,7 +56,7 @@ function CurrencyCreateForm({onSuccess}) {
             setSuccess(true);
             setName('');
             setCode('');
-            setRub_rate(0)
+            setRub_rate(1)
             setSign('')
 
 
@@ -98,6 +113,8 @@ function CurrencyCreateForm({onSuccess}) {
                         maxLength="10"
                         disabled={loading}
                         label={'Курс рубля(double)'}
+                        defaultValue={1}
+                        required={true}
                     />
                 </Box>
 
@@ -117,7 +134,7 @@ function CurrencyCreateForm({onSuccess}) {
                 <Button
                     variant={'contained'}
                     type="submit"
-                    disabled={loading || !name.trim() || !code.trim()|| !rub_rate || !sign}
+                    disabled={loading || !name.trim() || !code.trim() || !rub_rate || !sign}
                     style={{padding: '10px 20px'}}
                 >
                     {loading ? 'Создаётся...' : 'Создать валюту'}
@@ -125,8 +142,10 @@ function CurrencyCreateForm({onSuccess}) {
 
                 <Box mt={2} mb={2} height={50}>
                     {success &&
-                        <Alert variant={'filled'} severity="success">Валюта создана</Alert>}
-                    {error && <Alert variant={'filled'} severity="error">{error}</Alert>}
+                        <Alert variant={'filled'} severity="success">Валюта
+                            создана</Alert>}
+                    {error && <Alert variant={'filled'}
+                                     severity="error">{error}</Alert>}
                 </Box>
 
             </form>

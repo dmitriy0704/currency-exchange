@@ -42,17 +42,15 @@ function CurrencyExchange() {
 
             setResult(response.data);
         } catch (err) {
-            setError(
-                err.response?.data?.error
-            );
-            console.error(err);
+            setError(err.response?.data?.error);
+            // console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <Box mb={2} mt={3}>
+        <Box mb={2}>
 
             <Grid container>
 

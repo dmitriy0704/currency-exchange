@@ -38,10 +38,10 @@ const columns = [
     },
     {
         field: 'baseCurrency-rub_curr',
-        headerName: 'Курс базовой валюты(руб.)',
+        headerName: 'Курс базовой валюты(рублей)',
         description: 'description.',
         sortable: false,
-        width: 220,
+        width: 250,
         valueGetter: (value, row) => `${row.baseCurrency?.rub_rate || ''}`,
     },
     {
@@ -73,10 +73,10 @@ const columns = [
     },
     {
         field: 'targetCurrency-rub_rate',
-        headerName: 'Курс целевой валюты(руб.)',
+        headerName: 'Курс целевой валюты(рублей)',
         description: 'description.',
         sortable: false,
-        width: 220,
+        width: 250,
         valueGetter: (value, row) => `${row.targetCurrency?.rub_rate || ''}`,
     },
 ];
@@ -93,19 +93,15 @@ function ExchangeRates({exchangeRates, loadingExchangeRates}) {
 
     if (!exchangeRates || exchangeRates.length === 0)
         return <Box m={2}>
-            <Alert
-                variant={'filled'}
-                severity="info"
-                height={'50px'}>Нет данных для загрузки</Alert>
+           <Typography variant={'body1'}>Нет данных для загрузки</Typography>
         </Box>
 
 
     return (
-        <Box>
             <Grid container>
                 <Grid size={12} p={2}>
 
-                    <Box>
+                    <Box className={"exchange"}>
                         <Paper sx={{
                             maxHeight: 400,
                             width: '100%',
@@ -142,7 +138,6 @@ function ExchangeRates({exchangeRates, loadingExchangeRates}) {
                 {/*    </Box>*/}
                 {/*</Grid>*/}
             </Grid>
-        </Box>
     );
 
 }

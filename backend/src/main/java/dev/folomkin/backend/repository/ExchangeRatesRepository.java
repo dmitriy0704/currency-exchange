@@ -63,7 +63,7 @@ public class ExchangeRatesRepository {
 
     public ExchangeRate findByCodes(String baseCode, String targetCode) {
         String sql = """
-                SELECT 
+                SELECT
                     er.id AS rate_id,
                     er.rate,
                     base.id AS base_id,
