@@ -57,6 +57,7 @@ function ExchangeRatesCreateForm({onSuccess}) {
     return (
         <Box mb={2}>
                 <Box p={2}
+                     mb={2}
                      sx={{backgroundColor: '#3d5afe'}}>
                     <Typography
                         component={'h2'}

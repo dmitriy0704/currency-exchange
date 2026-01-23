@@ -277,7 +277,8 @@ public class ExchangeRatesRepository {
         fromCode = fromCode.trim().toUpperCase();
         toCode = toCode.trim().toUpperCase();
 
-        findByCodes(fromCode, toCode);
+//        findByCodes(fromCode, toCode);
+//        findByCodes(toCode, fromCode);
 
 
         String sql = """
@@ -415,7 +416,7 @@ public class ExchangeRatesRepository {
                     return result;
 //                    return Response.ok(result).build();
                 } else {
-                    throw new RuntimeException("Курс для пары " + fromCode + "/" + toCode + " не найден");
+                    throw new NotFoundException("Курс для пары " + fromCode + "/" + toCode + " не найден");
 //                    return Response.status(Response.Status.NOT_FOUND)
 //                            .entity("{\"error\": \"Курс для пары " + fromCode + "/" + toCode + " не найден\"}")
 //                            .build();

@@ -131,14 +131,17 @@ function CurrencyCreateForm({onSuccess}) {
                     />
                 </Box>
 
-                <Button
-                    variant={'contained'}
-                    type="submit"
-                    disabled={loading || !name.trim() || !code.trim() || !rub_rate || !sign}
-                    style={{padding: '10px 20px'}}
-                >
-                    {loading ? 'Создаётся...' : 'Создать валюту'}
-                </Button>
+                <Box mt={2} >
+                    <Button
+                        variant={'contained'}
+                        type="submit"
+                        disabled={loading || !name.trim() || !code.trim() || !rub_rate || !sign}
+                        style={{padding: '10px 20px'}}
+                    >
+                        {loading ? 'Создаётся...' : 'Создать валюту'}
+                    </Button>
+                </Box>
+
 
                 <Box mt={2} mb={2} height={50}>
                     {success &&

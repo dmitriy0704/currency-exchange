@@ -125,17 +125,12 @@ function Dashboard() {
 
 
     //-> Поиск обменного курса по коду валютной пары
-
-
     const handleInputChangeExchangeRates = (e) => {
         setCodesExchangeRate(e.target.value.toUpperCase());
         setErrorExchangeRates(null); // сбрасываем ошибку при вводе
-
         if (e.target.value.length > 6) {
             setErrorExchangeRates("Длина значения не равна 6")
         }
-
-
     };
 
     const handleExchangeRatesLoadData = async () => {
@@ -228,7 +223,7 @@ function Dashboard() {
                 </Grid>
             </Grid>
             <Grid container spacing={2}>
-                <Grid size={7}>
+                <Grid size={{xs:12, sm:12, md:7}}>
                     <Box mt={2}
                          sx={{
                              backgroundColor: '#fff',
@@ -352,7 +347,7 @@ function Dashboard() {
                         {/*</Box>*/}
                     </Box>
                 </Grid>
-                <Grid size={5}>
+                <Grid size={{xs:12, sm:12, md:5}}>
                     <Box mt={2} sx={{
                         backgroundColor: '#fff',
                         border: '1px solid #aaa'
@@ -451,7 +446,7 @@ function Dashboard() {
                                             USDEUR</Typography>
                                     </Popover>
                                 </Box>
-                                <Box>
+                                <Box mt={2}>
                                     <Button
                                         variant={"contained"}
                                         onClick={handleExchangeRatesLoadData}
@@ -503,7 +498,7 @@ function Dashboard() {
                 </Grid>
 
                 <Grid container size={12} spacing={2} p={2}>
-                    <Grid size={6}>
+                    <Grid size={{xs:12, sm:12, md:6}}>
                         <Box mt={3} sx={{
                             backgroundColor: '#fff',
                             border: '1px solid #aaa'
@@ -513,7 +508,7 @@ function Dashboard() {
                         </Box>
                     </Grid>
 
-                    <Grid size={6}>
+                    <Grid size={{xs:12, sm:12, md:6}}>
                         <Box mt={3} sx={{
                             backgroundColor: '#fff',
                             border: '1px solid #aaa'
@@ -522,11 +517,7 @@ function Dashboard() {
                         </Box>
                     </Grid>
                 </Grid>
-
-
             </Grid>
-
-
         </Container>
     );
 }

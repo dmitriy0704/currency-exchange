@@ -46,16 +46,21 @@ function CurrencyExchange() {
             // console.error(err);
         } finally {
             setLoading(false);
+            setFrom('')
+            setTo('')
+            setAmount(0)
+            setTimeout(()=>{
+                setError(null)
+            }, 2500)
         }
     };
 
     return (
         <Box mb={2}>
-
             <Grid container>
-
                 <Grid size={12}>
                     <Box p={2}
+                         mb={4}
                          sx={{backgroundColor: '#3d5afe'}}>
                         <Typography
                             component={'h2'}
@@ -69,11 +74,11 @@ function CurrencyExchange() {
             </Grid>
             <Grid container spacing={2} maxWidth={'xs'}>
                 <Grid size={12}>
-                    <Box p={2}>
+                    <Box pl={2} pr={2}>
                         <form onSubmit={handleExchange}>
                             <Grid container spacing={2}>
                                 <Grid size={12}>
-                                    <Box mb={2} mt={2}>
+                                    <Box >
                                         <TextField
                                             fullWidth={true}
                                             type="number"
@@ -81,13 +86,12 @@ function CurrencyExchange() {
                                             onChange={(e) => setAmount(e.target.value)}
                                             placeholder="Сумма"
                                             disabled={loading}
-                                            required={true}
                                             label={"Сумма перевода"}
                                         />
                                     </Box>
                                 </Grid>
 
-                                <Grid size={6}>
+                                <Grid size={{xs:12, sm:6, md:6}}>
                                     <Box>
                                         <TextField
                                             fullWidth={true}
@@ -98,12 +102,11 @@ function CurrencyExchange() {
                                             maxLength="3"
                                             label={'Из валюты'}
                                             disabled={loading}
-                                            required
                                         />
                                     </Box>
                                 </Grid>
 
-                                <Grid size={6}>
+                                <Grid size={{xs:12, sm:6, md:6}}>
                                     <Box>
                                         <TextField
                                             fullWidth={true}
@@ -114,13 +117,10 @@ function CurrencyExchange() {
                                             maxLength="3"
                                             label={'В валюту'}
                                             disabled={loading}
-                                            required
                                         />
                                     </Box>
                                 </Grid>
-
-
-                                <Grid size={12}>
+                                <Grid size={12} mt={2}>
                                     <Button
                                         fullWidth={true}
                                         variant={'contained'}
@@ -169,14 +169,8 @@ function CurrencyExchange() {
                             </Box>
                         )}
                     </Box>
-
-
                 </Grid>
-
-
             </Grid>
-
-
         </Box>
     );
 }
