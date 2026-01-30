@@ -28,7 +28,10 @@ public class ExchangeRateResource {
         this.service = new ExchangeRatesService(repository);
     }
 
-
+    /**
+     * GET /exchangeRate/{codes}
+     * Получение обменного курса по коду валют
+     */
     @GET
     @Path("/{codes}")
     public Response getExchangeRate(@PathParam("codes") String codes) {
@@ -43,7 +46,7 @@ public class ExchangeRateResource {
 
 
     /**
-     * Метод нужен для ситуации,
+     * GET - Метод нужен для ситуации,
      * когда в /exchangeRate/USDEUR - коды валют отсутствовать
      */
 

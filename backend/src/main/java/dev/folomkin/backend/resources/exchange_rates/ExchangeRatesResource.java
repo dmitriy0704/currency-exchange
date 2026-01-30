@@ -30,7 +30,10 @@ public class ExchangeRatesResource {
         this.service = new ExchangeRatesService(repository);
     }
 
-
+    /**
+     * GET /exchangeRates
+     * Получение списка всех обменных курсов
+     */
     @GET
     public Response getAllExchangeRates() {
         try {
@@ -40,7 +43,13 @@ public class ExchangeRatesResource {
         }
     }
 
-
+    /**
+     * POST /exchangeRates
+     * Тело запроса: x-www-form-urlencoded
+     * Поля: baseCurrencyCode=id базовой валюты;
+     *       targetCurrencyCode=id конечной валюты;
+     * Создает обменный курс
+     */
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)
@@ -52,7 +61,6 @@ public class ExchangeRatesResource {
         try {
 
             CreateExchangeRatesRequestDto ratesDto = new CreateExchangeRatesRequestDto(baseCode, targetCode);
-
             ExchangeRate exchangeRate = service.createExchangeRates(ratesDto);
             return Response.status(201).entity(exchangeRate).build();
         } catch (SQLException e) {

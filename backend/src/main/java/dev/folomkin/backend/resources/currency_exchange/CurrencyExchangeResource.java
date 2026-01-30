@@ -29,6 +29,14 @@ public class CurrencyExchangeResource {
     }
 
 
+    /**
+     * GET /exchange?from={baseCode}&to={targetCode}&amount={amount}
+     * Параметры запроса:
+     *      from=базовая валюта;
+     *      to=конечная валюта;
+     *      amount=сумма перевода
+     * Конвертирует валюты
+     */
     @GET
     public Response convertCurrency(
             @QueryParam("from") String fromCode,

@@ -36,6 +36,11 @@ public class CurrencyResource {
         this.currenciesService = new CurrenciesService(repository);
     }
 
+    /**
+     * GET /currency/{code}
+     * Поле: code=код валюты, например USD
+     * Получает валюты пол коду
+     */
     @GET
     @Path("/{code}")
     public Response getCurrencyByCode(@PathParam("code") String code) {
@@ -57,6 +62,11 @@ public class CurrencyResource {
         }
     }
 
+    /**
+     * GET /currency/null
+     * Поле: code пустое
+     * Метод для ситуации, если код валюты не передается
+     */
     @GET
     @Path("")
     public Response getCurrencyWithoutCode() {
@@ -65,6 +75,15 @@ public class CurrencyResource {
                 .build();
     }
 
+    /**
+     * POST /currency
+     * Тело запроса: x-www-form-urlencoded
+     * Поля: name=национальность валюты;
+     *       code=код валюты, например USD;
+     *       rub_rate=отношение курса валюты к рублю
+     *       sign=буквенное обозначение
+     * Создает новую валюту
+     */
     @POST
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
     @Produces(MediaType.APPLICATION_JSON)

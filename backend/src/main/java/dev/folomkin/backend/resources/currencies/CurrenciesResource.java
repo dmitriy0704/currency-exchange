@@ -31,6 +31,11 @@ public class CurrenciesResource {
         this.currenciesService = new CurrenciesService(repository);
     }
 
+
+    /**
+     * GET /currencies
+     * Получение списка всех валют
+     */
     @GET
     public Response getAllCurrencies() {
         try {
