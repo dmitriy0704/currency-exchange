@@ -1,6 +1,6 @@
 package dev.folomkin.backend.resources.exchange_rates;
 
-import dev.folomkin.backend.model.CreateExchangeRatesDto;
+import dev.folomkin.backend.model.CreateExchangeRatesRequestDto;
 import dev.folomkin.backend.model.ExchangeRate;
 import dev.folomkin.backend.repository.ExchangeRatesRepository;
 import dev.folomkin.backend.service.ExchangeRatesService;
@@ -51,7 +51,7 @@ public class ExchangeRatesResource {
     ) {
         try {
 
-            CreateExchangeRatesDto  ratesDto = new CreateExchangeRatesDto(baseCode, targetCode);
+            CreateExchangeRatesRequestDto ratesDto = new CreateExchangeRatesRequestDto(baseCode, targetCode);
 
             ExchangeRate exchangeRate = service.createExchangeRates(ratesDto);
             return Response.status(201).entity(exchangeRate).build();

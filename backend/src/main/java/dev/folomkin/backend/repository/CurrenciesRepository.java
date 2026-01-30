@@ -1,6 +1,5 @@
 package dev.folomkin.backend.repository;
 
-import dev.folomkin.backend.exception.AlreadyExistsException;
 import dev.folomkin.backend.exception.NotFoundException;
 import dev.folomkin.backend.model.Currency;
 import dev.folomkin.backend.util.DatabaseUtil;
@@ -20,7 +19,6 @@ public class CurrenciesRepository {
         this.context = context;
     }
 
-
     public List<Currency> findAll() throws SQLException {
         List<Currency> currencies = new ArrayList<>();
         String sql = "SELECT id, code, name, rub_rate, sign FROM currencies";
@@ -28,13 +26,13 @@ public class CurrenciesRepository {
         try (Connection conn = DatabaseUtil.getConnection(context);
              PreparedStatement pstmt = conn.prepareStatement(sql);
              ResultSet rs = pstmt.executeQuery()) {
-
             while (rs.next()) {
                 currencies.add(mapRowToCurrency(rs));
             }
         }
         return currencies;
     }
+
 
     public Currency findByCode(String code) throws SQLException {
         String sql = "SELECT id, code, name, rub_rate, sign FROM currencies WHERE code = ?";
@@ -48,16 +46,17 @@ public class CurrenciesRepository {
                     throw new NotFoundException("Валюта с кодом " + code + " не найдена");
                 }
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
             throw new SQLException("Ошибка БД");
         }
-
     }
 
 
-    public Currency save(String name, String code, BigDecimal rub_rate, String sign) throws SQLException {
+    /**
+     * -> Создание валюты
+     */
+    public Currency createCurrency(String name, String code, BigDecimal rub_rate, String sign) throws SQLException {
         String sql = "INSERT INTO currencies (name, code, rub_rate, sign) VALUES (?, ?, ?, ?)";
 
         try (Connection conn = DatabaseUtil.getConnection(context);
@@ -85,18 +84,18 @@ public class CurrenciesRepository {
     }
 
 
+    /**
+     * -> Маппер ResultSet в объект валюты
+     */
     private Currency mapRowToCurrency(ResultSet rs) throws SQLException {
-
         BigDecimal rate = new BigDecimal(rs.getBigDecimal("rub_rate").doubleValue());
         BigDecimal rounded = rate.setScale(2, RoundingMode.HALF_UP);
-
         Currency currency = new Currency();
         currency.setId(rs.getLong("id"));
         currency.setCode(rs.getString("code"));
         currency.setName(rs.getString("name"));
         currency.setRub_rate(rounded);
         currency.setSign(rs.getString("sign"));
-
         return currency;
     }
 }

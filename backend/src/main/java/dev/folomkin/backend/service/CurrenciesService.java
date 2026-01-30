@@ -1,12 +1,10 @@
 package dev.folomkin.backend.service;
 
 import dev.folomkin.backend.exception.AlreadyExistsException;
-import dev.folomkin.backend.exception.ConflictException;
 import dev.folomkin.backend.exception.NotFoundException;
 import dev.folomkin.backend.model.CreateCurrencyRequestDto;
 import dev.folomkin.backend.model.Currency;
 import dev.folomkin.backend.repository.CurrenciesRepository;
-import jakarta.ws.rs.core.Response;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -51,7 +49,7 @@ public class CurrenciesService {
 
         } catch (NotFoundException e) {
             //-> Валюты нет — можно создавать новую
-            return currenciesRepository.save(normalizedName, normalizedCode, rubRate, normalizedSign);
+            return currenciesRepository.createCurrency(normalizedName, normalizedCode, rubRate, normalizedSign);
         }
     }
 }

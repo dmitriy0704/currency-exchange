@@ -76,14 +76,10 @@ public class CurrencyResource {
     ) {
         try {
 
-            /// Наличие параметров формы проверяется на фронте.
-
+            //-> Наличие параметров формы проверяется на фронте.
             CreateCurrencyRequestDto request = new CreateCurrencyRequestDto(name, code, rub_rate, sign);
             Currency currency = currenciesService.createCurrency(request);
-            return Response
-                    .status(201)
-                    .entity(currency)
-                    .build();
+            return Response.status(201).entity(currency).build();
         } catch (IllegalArgumentException e) {
             return Response.status(400).entity("{\"error\": \"" + e.getMessage() + "\"}").build();
         } catch (ConflictException e) {

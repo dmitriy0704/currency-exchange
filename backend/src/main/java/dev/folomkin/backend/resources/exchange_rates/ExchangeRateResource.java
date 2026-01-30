@@ -22,12 +22,10 @@ public class ExchangeRateResource {
 
     private ExchangeRatesService service;
 
-
     @PostConstruct
     public void init() {
         ExchangeRatesRepository repository = new ExchangeRatesRepository(context);
         this.service = new ExchangeRatesService(repository);
-
     }
 
 
@@ -58,13 +56,11 @@ public class ExchangeRateResource {
     }
 
 
-    /*
-     * PATCH /exchangeRate/USDRUB
-     *
+    /**
+     * PATCH /exchangeRate/{codes}
      * Тело запроса: x-www-form-urlencoded
      * Поле: rate=новое_значение
-     *
-     * Обновляет курс для существующей пары USD → RUB
+     * Обновляет курс для существующей пары, например USD/EUR
      */
 
     @PATCH
@@ -74,20 +70,6 @@ public class ExchangeRateResource {
     public Response updateExchangeRate(
             @PathParam("codes") String codes,
             @FormParam("rate") BigDecimal newRate) {
-
-//        if (newRate == null) {
-//            return Response.status(Response.Status.BAD_REQUEST)
-//                    .entity("{\"error\": \"Поле 'rate' обязательно в теле запроса\"}")
-//                    .type(MediaType.APPLICATION_JSON)
-//                    .build();
-//        }
-//
-//        if (newRate.compareTo(BigDecimal.ZERO) <= 0) {
-//            return Response.status(400)
-//                    .entity("{\"error\": \"rate должен быть положительным\"}")
-//                    .build();
-//        }
-
         try {
             return Response.ok(service.updateExchangeRate(codes, newRate)).build();
         } catch (IllegalArgumentException e) {

@@ -1,17 +1,16 @@
 package dev.folomkin.backend.model;
 
-public class CreateExchangeRatesDto {
+public class CreateExchangeRatesRequestDto {
     private String baseCode;
     private String targetCode;
 
-    public CreateExchangeRatesDto() {
+    public CreateExchangeRatesRequestDto() {
     }
 
-    public CreateExchangeRatesDto(String baseCode, String targetCode) {
+    public CreateExchangeRatesRequestDto(String baseCode, String targetCode) {
         this.baseCode = baseCode;
         this.targetCode = targetCode;
     }
-
 
     public String getBaseCode() {
         return baseCode;

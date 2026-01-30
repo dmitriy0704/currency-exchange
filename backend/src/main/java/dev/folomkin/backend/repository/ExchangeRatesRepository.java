@@ -56,7 +56,6 @@ public class ExchangeRatesRepository {
             // При ошибке можно бросить WebApplicationException или вернуть пустой список
             throw new WebApplicationException("Ошибка базы данных", Response.Status.INTERNAL_SERVER_ERROR);
         }
-
         return rates;
     }
 
@@ -84,14 +83,10 @@ public class ExchangeRatesRepository {
 
         try (Connection conn = DatabaseUtil.getConnection(context);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setString(1, baseCode);
             pstmt.setString(2, targetCode);
-
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-
-                    // Возвращаем один объект (не массив!)
                     return mapToExchangeRate(rs);
                 } else {
                     throw new NotFoundException("Обменный курс с валютной парой " + baseCode + "/" + targetCode + " не найден");
@@ -119,7 +114,7 @@ public class ExchangeRatesRepository {
                 """;
 
         try (Connection conn = DatabaseUtil.getConnection(context)) {
-            // Ищем обе валюты по коду
+            //-> Ищем обе валюты по коду
             Long baseId = null, targetId = null;
             Currency baseCurrency = null, targetCurrency = null;
 
@@ -130,14 +125,12 @@ public class ExchangeRatesRepository {
                 pstmt.setString(3, baseCode);
                 pstmt.setString(4, targetCode);
 
-
                 try (ResultSet rs = pstmt.executeQuery()) {
                     while (rs.next()) {
                         String code = rs.getString("code");
 
                         BigDecimal rate = new BigDecimal(rs.getBigDecimal("rub_rate").doubleValue());
                         BigDecimal rounded = rate.setScale(2, RoundingMode.HALF_UP);
-
 
                         if (code.equals(baseCode)) {
                             baseId = rs.getLong("id");
@@ -162,14 +155,14 @@ public class ExchangeRatesRepository {
                 }
             }
 
-            // Проверяем, найдены ли обе валюты
+            //-> Проверяем, найдены ли обе валюты
             if (baseCurrency == null) {
                 throw new NotFoundException("Базовая валюта с кодом " + baseCode + " не найдена");
             }
             if (targetCurrency == null) {
                 throw new NotFoundException("Целевая валюта с кодом " + targetCode + " не найдена");
             }
-            // Проверяем, нет ли уже такой пары (опционально, но рекомендуется)
+            //-> Проверяем, нет ли уже такой пары
             String checkDuplicate = """
                     SELECT 1 FROM exchange_rates
                     WHERE base_currency_id = ? AND target_currency_id = ?
@@ -184,11 +177,9 @@ public class ExchangeRatesRepository {
                 }
             }
 
-            // Вставляем новую пару
+            //-> Вставляем новую пару
             try (PreparedStatement pstmt = conn.prepareStatement(sqlInsertRate, Statement.RETURN_GENERATED_KEYS)) {
 
-                assert baseCurrency != null;
-                assert targetCurrency != null;
                 BigDecimal calculateRates = calculateRates(
                         baseCurrency.getRub_rate(),
                         targetCurrency.getRub_rate()
@@ -199,7 +190,7 @@ public class ExchangeRatesRepository {
                 pstmt.setBigDecimal(3, calculateRates);
                 pstmt.executeUpdate();
 
-                // Получаем сгенерированный ID
+                //-> Получаем сгенерированный ID
                 long generatedId;
                 try (ResultSet keys = pstmt.getGeneratedKeys()) {
                     if (keys.next()) {
@@ -225,7 +216,6 @@ public class ExchangeRatesRepository {
         baseCode = baseCode.toUpperCase();
         targetCode = targetCode.toUpperCase();
 
-        // 3. Поиск пары
         String sqlFind = """
                 SELECT er.id as rate_id,
                        er.rate,
@@ -258,7 +248,7 @@ public class ExchangeRatesRepository {
 
                 long rateId = rs.getLong("rate_id");
 
-                // 4. Обновление курса
+                //-> Обновление курса
                 String sqlUpdate = "UPDATE exchange_rates SET rate = ? WHERE id = ?";
                 try (PreparedStatement updateStmt = conn.prepareStatement(sqlUpdate)) {
                     updateStmt.setBigDecimal(1, newRate);
@@ -266,15 +256,12 @@ public class ExchangeRatesRepository {
                     updateStmt.executeUpdate();
                 }
 
-                // 5. Формируем ответ (тот же формат, что и в GET)
-
-
+                //-> Формируем ответ
                 BigDecimal baseRubRateRound = new BigDecimal(rs.getBigDecimal("base_rub_rate").doubleValue());
                 BigDecimal baseRubRateRounded = baseRubRateRound.setScale(2, RoundingMode.HALF_UP);
 
                 BigDecimal targetRubRateRound = new BigDecimal(rs.getBigDecimal("target_rub_rate").doubleValue());
                 BigDecimal targetRubRateRounded = targetRubRateRound.setScale(2, RoundingMode.HALF_UP);
-
 
                 Currency base = new Currency(
                         rs.getLong("base_id"),
@@ -298,7 +285,6 @@ public class ExchangeRatesRepository {
                         target,
                         newRate
                 );
-//                return mapToExchangeRate(rs);
             }
 
         } catch (SQLException e) {
@@ -345,7 +331,9 @@ public class ExchangeRatesRepository {
     }
 
 
-    /// -> Подсчет кросскурса обмена валют
+    /**
+     * -> Подсчет кросс-курса обмена валют
+     */
 
     public BigDecimal calculateRates(BigDecimal baseCurrencyRate, BigDecimal targetCurrencyRate) throws SQLException {
 
@@ -370,16 +358,13 @@ public class ExchangeRatesRepository {
     }
 
 
-    /// -> Конвертация валют
-    public ConversionResultDto convertCurrency(String fromCode, String toCode, BigDecimal amount) {
+    /**
+     * -> Конвертация валют
+     */
 
+    public ConversionResultDto convertCurrency(String fromCode, String toCode, BigDecimal amount) {
         fromCode = fromCode.trim().toUpperCase();
         toCode = toCode.trim().toUpperCase();
-
-//        findByCodes(fromCode, toCode);
-//        findByCodes(toCode, fromCode);
-
-
         String sql = """
                 SELECT
                     er.rate,
@@ -401,16 +386,11 @@ public class ExchangeRatesRepository {
 
         try (Connection conn = DatabaseUtil.getConnection(context);
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
             pstmt.setString(1, fromCode);
             pstmt.setString(2, toCode);
-
             try (ResultSet rs = pstmt.executeQuery()) {
-
                 if (rs.next()) {
-
                     BigDecimal rate = rs.getBigDecimal("rate");
-
                     Currency base = new Currency(
                             rs.getLong("base_id"),
                             rs.getString("base_name"),
@@ -429,7 +409,6 @@ public class ExchangeRatesRepository {
 
                     BigDecimal convertedAmount = amount.multiply(rate);
 
-                    // Формируем ответ
                     ConversionResultDto result = new ConversionResultDto(
                             base,
                             target,
@@ -437,15 +416,11 @@ public class ExchangeRatesRepository {
                             amount,
                             convertedAmount
                     );
-
-//                    return Response.ok(result).build();
                     return result;
-
                 } else {
-                    // Прямой курс не найден — ищем обратный и рассчитываем
+                    //-> Прямой курс не найден — ищем обратный и рассчитываем
                     return handleReverseRate(fromCode, toCode, amount);
                 }
-
             }
 
         } catch (SQLException e) {
@@ -455,7 +430,6 @@ public class ExchangeRatesRepository {
     }
 
     private ConversionResultDto handleReverseRate(String fromCode, String toCode, BigDecimal amount) throws SQLException {
-
         String reverseSql = """
                 SELECT er.rate,
                        base.id AS base_id,
@@ -476,13 +450,10 @@ public class ExchangeRatesRepository {
 
         try (Connection conn = DatabaseUtil.getConnection(context);
              PreparedStatement pstmt = conn.prepareStatement(reverseSql)) {
-
             pstmt.setString(1, toCode);   // ищем пару to → from
             pstmt.setString(2, fromCode);
-
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
-
                     BigDecimal reverseRate = rs.getBigDecimal("rate");
                     BigDecimal directRate = BigDecimal.ONE.divide(reverseRate, 2, RoundingMode.HALF_UP);
 
@@ -518,6 +489,5 @@ public class ExchangeRatesRepository {
                 }
             }
         }
-
     }
 }

@@ -20,7 +20,6 @@ public class CurrencyExchangeResource {
     @Context
     private ServletContext context;
 
-
     private CurrencyExchangeService service;
 
     @PostConstruct
