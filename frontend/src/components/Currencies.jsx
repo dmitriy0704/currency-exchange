@@ -49,7 +49,7 @@ function Currencies({currencies, loading, error, isSearching}) {
                         </Box>
                     )}
                 </Grid>
-                <Grid size={12}>
+                <Grid size={8}>
                     <Box className={"currencies-table"}>
                         <Paper sx={{
                             maxHeight: 400,
@@ -68,24 +68,22 @@ function Currencies({currencies, loading, error, isSearching}) {
                         </Paper>
                     </Box>
                 </Grid>
-                {/*<Grid size={5} p={2}>*/}
-                {/*    <Box>*/}
-                {/*        <Box sx={{textAlign: 'left'}}>*/}
-                {/*            <ReactJsonView*/}
-                {/*                src={currencies}*/}
-                {/*                theme="rjv-default"*/}
-                {/*                displayObjectSize={true}*/}
-                {/*                collapsed={false}*/}
-                {/*                style={{*/}
-                {/*                    maxHeight: 370,*/}
-                {/*                    overflow: "auto",*/}
-                {/*                    fontSize: 14,*/}
-                {/*                    border: '1px solid #cccccc'*/}
-                {/*                }}*/}
-                {/*            />*/}
-                {/*        </Box>*/}
-                {/*    </Box>*/}
-                {/*</Grid>*/}
+                <Grid size={4} >
+                        <Box sx={{textAlign: 'left'}} pl={1} pr={1}>
+                            <ReactJsonView
+                                src={currencies}
+                                theme="rjv-default"
+                                displayObjectSize={true}
+                                collapsed={false}
+                                style={{
+                                    maxHeight: 370,
+                                    overflow: "auto",
+                                    fontSize: 14,
+                                    border: '1px solid #cccccc'
+                                }}
+                            />
+                        </Box>
+                </Grid>
             </Grid>
     );
 }

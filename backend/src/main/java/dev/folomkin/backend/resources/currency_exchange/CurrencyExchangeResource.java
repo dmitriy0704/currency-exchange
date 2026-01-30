@@ -1,4 +1,4 @@
-package dev.folomkin.backend.resources;
+package dev.folomkin.backend.resources.currency_exchange;
 
 
 import dev.folomkin.backend.model.ConversionResultDto;

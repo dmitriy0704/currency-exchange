@@ -1,4 +1,4 @@
-package dev.folomkin.backend.resources;
+package dev.folomkin.backend.resources.currencies;
 
 import dev.folomkin.backend.repository.CurrenciesRepository;
 import dev.folomkin.backend.service.CurrenciesService;

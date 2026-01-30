@@ -7,6 +7,7 @@ import dev.folomkin.backend.util.DatabaseUtil;
 import jakarta.servlet.ServletContext;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,11 +87,14 @@ public class CurrenciesRepository {
 
     private Currency mapRowToCurrency(ResultSet rs) throws SQLException {
 
+        BigDecimal rate = new BigDecimal(rs.getBigDecimal("rub_rate").doubleValue());
+        BigDecimal rounded = rate.setScale(2, RoundingMode.HALF_UP);
+
         Currency currency = new Currency();
         currency.setId(rs.getLong("id"));
         currency.setCode(rs.getString("code"));
         currency.setName(rs.getString("name"));
-        currency.setRub_rate(rs.getBigDecimal("rub_rate"));
+        currency.setRub_rate(rounded);
         currency.setSign(rs.getString("sign"));
 
         return currency;

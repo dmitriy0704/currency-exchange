@@ -1,10 +1,8 @@
-package dev.folomkin.backend.resources;
+package dev.folomkin.backend.resources.exchange_rates;
 
 import dev.folomkin.backend.model.CreateExchangeRatesDto;
 import dev.folomkin.backend.model.ExchangeRate;
-import dev.folomkin.backend.repository.CurrenciesRepository;
 import dev.folomkin.backend.repository.ExchangeRatesRepository;
-import dev.folomkin.backend.service.CurrenciesService;
 import dev.folomkin.backend.service.ExchangeRatesService;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.ServletContext;
@@ -13,7 +11,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 
 @Path("/exchangeRates")

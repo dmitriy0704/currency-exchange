@@ -16,6 +16,7 @@ import ExchangeRatesCreateForm from "./ExchangeRatesCreateForm.jsx";
 import CurrencyExchange from "./CurrencyExchange.jsx";
 import InfoIcon from "@mui/icons-material/Info";
 import ClearIcon from '@mui/icons-material/Clear';
+import ExchangeRatesUpdateForm from "./ExchangeRatesUpdateForm.jsx";
 
 function Dashboard() {
     const [currencies, setCurrencies] = useState([]);
@@ -169,8 +170,15 @@ function Dashboard() {
     };
 
 
-    //-> Создание новой валюты
+    //-> Создание нового обменного курса
     const handleExchangeRatesCreated = () => {
+        loadAllExchangeRates();
+    };
+
+    //-> Обновление обменного курса
+
+
+    const handleExchangeRatesUpdated = () => {
         loadAllExchangeRates();
     };
 
@@ -223,7 +231,7 @@ function Dashboard() {
                 </Grid>
             </Grid>
             <Grid container spacing={2}>
-                <Grid size={{xs:12, sm:12, md:7}}>
+                <Grid size={{xs:12, sm:12, md:8}}>
                     <Box mt={2}
                          sx={{
                              backgroundColor: '#fff',
@@ -347,7 +355,7 @@ function Dashboard() {
                         {/*</Box>*/}
                     </Box>
                 </Grid>
-                <Grid size={{xs:12, sm:12, md:5}}>
+                <Grid size={{xs:12, sm:12, md:4}}>
                     <Box mt={2} sx={{
                         backgroundColor: '#fff',
                         border: '1px solid #aaa'
@@ -391,7 +399,7 @@ function Dashboard() {
                                 <Typography variant={'h2'}
                                             fontWeight={'bold'}
                                             fontSize={18} mt={4} mb={2}>
-                                    Поиск по коду курсов обмена валют
+                                    Поиск по коду обменных курсов валют
                                 </Typography>
 
                                 <Box>
@@ -498,7 +506,7 @@ function Dashboard() {
                 </Grid>
 
                 <Grid container size={12} spacing={2} p={2}>
-                    <Grid size={{xs:12, sm:12, md:6}}>
+                    <Grid size={{xs:12, sm:12, md:4}}>
                         <Box mt={3} sx={{
                             backgroundColor: '#fff',
                             border: '1px solid #aaa'
@@ -508,7 +516,17 @@ function Dashboard() {
                         </Box>
                     </Grid>
 
-                    <Grid size={{xs:12, sm:12, md:6}}>
+                    <Grid size={{xs:12, sm:12, md:4}}>
+                        <Box mt={3} sx={{
+                            backgroundColor: '#fff',
+                            border: '1px solid #aaa'
+                        }}>
+                            <ExchangeRatesUpdateForm
+                                onSuccess={handleExchangeRatesUpdated}/>
+                        </Box>
+                    </Grid>
+
+                    <Grid size={{xs:12, sm:12, md:4}}>
                         <Box mt={3} sx={{
                             backgroundColor: '#fff',
                             border: '1px solid #aaa'

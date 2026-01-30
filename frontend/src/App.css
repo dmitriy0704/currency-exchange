@@ -19,3 +19,7 @@ button{
 .exchange .MuiButtonBase-root{
   width: 55px!important;
 }
+
+.MuiDataGrid-main{
+  /*height: 320px;*/
+}

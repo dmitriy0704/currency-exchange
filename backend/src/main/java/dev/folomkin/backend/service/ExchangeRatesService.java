@@ -4,9 +4,7 @@ import dev.folomkin.backend.exception.AlreadyExistsException;
 import dev.folomkin.backend.exception.NotFoundException;
 import dev.folomkin.backend.exception.ValidationException;
 import dev.folomkin.backend.model.CreateExchangeRatesDto;
-import dev.folomkin.backend.model.Currency;
 import dev.folomkin.backend.model.ExchangeRate;
-import dev.folomkin.backend.repository.CurrenciesRepository;
 import dev.folomkin.backend.repository.ExchangeRatesRepository;
 
 import java.math.BigDecimal;
@@ -37,6 +35,9 @@ public class ExchangeRatesService {
         String baseCode = codes.substring(0, 3);
         String targetCode = codes.substring(3);
 
+        if (baseCode.equals(targetCode)) {
+            throw new IllegalArgumentException("Базовая и целевая валюты не могут быть одинаковыми");
+        }
         return repository.findByCodes(baseCode, targetCode);
     }
 
@@ -61,9 +62,33 @@ public class ExchangeRatesService {
             repository.findByCodes(ratesDto.getBaseCode(), ratesDto.getTargetCode());
             throw new AlreadyExistsException("Обменный курс уже существует");
         } catch (NotFoundException e) {
-            return repository.save(ratesDto.getBaseCode(), ratesDto.getTargetCode());
+            return repository.createExchangeRate(ratesDto.getBaseCode(), ratesDto.getTargetCode());
 
         }
 
+    }
+
+
+    public ExchangeRate updateExchangeRate(String codes, BigDecimal newRate) throws SQLException {
+
+
+        if (newRate == null) {
+            throw new IllegalArgumentException("Укажите значение обменного курса");
+        }
+        if (codes.length() != 6) {
+            throw new IllegalArgumentException("Длина кодовой пары должна составлять 6 символов");
+        }
+        String baseCode = codes.substring(0, 3).trim().toUpperCase();
+        String targetCode = codes.substring(3).trim().toUpperCase();
+
+        if (baseCode.equals(targetCode)) {
+            throw new IllegalArgumentException("Базовая и целевая валюты не могут быть одинаковыми");
+        }
+
+        // 2. Валидация rate
+        if (newRate == null || newRate.compareTo(BigDecimal.ZERO) <= 0) {
+                throw new IllegalArgumentException("Новый курс должен быть положительным числом");
+        }
+        return repository.updateExchangeRate(baseCode, targetCode, newRate);
     }
 }

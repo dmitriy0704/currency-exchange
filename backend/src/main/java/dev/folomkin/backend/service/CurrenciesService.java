@@ -43,14 +43,14 @@ public class CurrenciesService {
         BigDecimal rubRate = requestDto.getRub_rate();
 
         try {
-            // Пытаемся найти валюту по коду
+            //-> Пытаемся найти валюту по коду
             currenciesRepository.findByCode(normalizedCode);
 
-            // Если метод не бросил исключение — валюта уже существует
+            //-> Если метод не бросил исключение — валюта уже существует
             throw new AlreadyExistsException("Валюта с кодом " + normalizedCode + " уже существует");
 
         } catch (NotFoundException e) {
-            // Валюты нет — можно создавать новую
+            //-> Валюты нет — можно создавать новую
             return currenciesRepository.save(normalizedName, normalizedCode, rubRate, normalizedSign);
         }
     }

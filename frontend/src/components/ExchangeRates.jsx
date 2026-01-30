@@ -93,51 +93,49 @@ function ExchangeRates({exchangeRates, loadingExchangeRates}) {
 
     if (!exchangeRates || exchangeRates.length === 0)
         return <Box m={2}>
-           <Typography variant={'body1'}>Нет данных для загрузки</Typography>
+            <Typography variant={'body1'}>Нет данных для загрузки</Typography>
         </Box>
 
 
     return (
-            <Grid container>
-                <Grid size={12} p={2}>
+        <Grid container>
+            <Grid size={8} p={2}>
 
-                    <Box className={"exchange"}>
-                        <Paper sx={{
-                            maxHeight: 400,
-                            width: '100%',
-                            border: '1px solid #aaa'
-                        }}>
-                            <DataGrid
-                                label={'LABEL'}
-                                rows={exchangeRates}
-                                columns={columns}
-                                initialState={{pagination: {paginationModel}}}
-                                pageSizeOptions={[5, 10]}
-                                checkboxSelection={false}
-                                sx={{border: 0}}
-                            />
-                        </Paper>
-                    </Box>
-                </Grid>
-                {/*<Grid size={4} p={2}>*/}
-                {/*    <Box>*/}
-                {/*        <Box sx={{textAlign: 'left'}}>*/}
-                {/*            <ReactJsonView*/}
-                {/*                src={exchangeRates}*/}
-                {/*                theme="rjv-default"*/}
-                {/*                displayObjectSize={true}*/}
-                {/*                collapsed={false}*/}
-                {/*                style={{*/}
-                {/*                    maxHeight: 370,*/}
-                {/*                    overflow: "auto",*/}
-                {/*                    fontSize: 14,*/}
-                {/*                    border: '1px solid #cccccc'*/}
-                {/*                }}*/}
-                {/*            />*/}
-                {/*        </Box>*/}
-                {/*    </Box>*/}
-                {/*</Grid>*/}
+                <Box className={"exchange"}>
+                    <Paper sx={{
+                        maxHeight: 400,
+                        width: '100%',
+                        border: '1px solid #aaa'
+                    }}>
+                        <DataGrid
+                            label={'LABEL'}
+                            rows={exchangeRates}
+                            columns={columns}
+                            initialState={{pagination: {paginationModel}}}
+                            pageSizeOptions={[5, 10]}
+                            checkboxSelection={false}
+                            sx={{border: 0, height:370}}
+                        />
+                    </Paper>
+                </Box>
             </Grid>
+            <Grid size={4} p={2}>
+                <Box sx={{textAlign: 'left'}}>
+                    <ReactJsonView
+                        src={exchangeRates}
+                        theme="rjv-default"
+                        displayObjectSize={true}
+                        collapsed={false}
+                        style={{
+                            maxHeight: 370,
+                            overflow: "auto",
+                            fontSize: 14,
+                            border: '1px solid #cccccc'
+                        }}
+                    />
+                </Box>
+            </Grid>
+        </Grid>
     );
 
 }

@@ -64,7 +64,7 @@ function ExchangeRatesCreateForm({onSuccess}) {
                         textAlign={'left'}
                         fontSize={18}
                         color={'#fff'}
-                    >Добавить обменный курс
+                    >Добавление обменного курса
                     </Typography>
                 </Box>
 
@@ -76,11 +76,10 @@ function ExchangeRatesCreateForm({onSuccess}) {
                                 fullWidth={true}
                                 type="text"
                                 value={baseCode}
-                                onChange={(e) => setBaseCode(e.target.value)}
+                                onChange={(e) => setBaseCode(e.target.value.toUpperCase())}
                                 placeholder="Например: USD"
                                 disabled={loading}
                                 label={'Код базовой валюты'}
-
                             />
                         </Box>
 
@@ -89,12 +88,11 @@ function ExchangeRatesCreateForm({onSuccess}) {
                                 fullWidth={true}
                                 type="text"
                                 value={targetCode}
-                                onChange={(e) => setTargetCode(e.target.value)}
+                                onChange={(e) => setTargetCode(e.target.value.toUpperCase())}
                                 placeholder="Например: EUR"
                                 // maxLength="3"
                                 disabled={loading}
                                 label={'Код целевой валюты'}
-
                             />
                         </Box>
                         <Box maxWidth={350} ml={'auto'} mr={'auto'} mt={2} mb={3}>
@@ -127,7 +125,7 @@ function ExchangeRatesCreateForm({onSuccess}) {
                                 type="submit"
                                 disabled={loading || !baseCode.trim() || !targetCode.trim()}
                             >
-                                {loading ? 'Создаётся...' : 'Создать курс обмена'}
+                                {loading ? 'Создаётся...' : 'Создать обменный курс'}
                             </Button>
                         </Box>
 

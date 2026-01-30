@@ -103,8 +103,7 @@ public class ExchangeRatesRepository {
     }
 
 
-    public ExchangeRate save(String baseCode, String targetCode) {
-        System.out.printf("BASECODE:  " + baseCode);
+    public ExchangeRate createExchangeRate(String baseCode, String targetCode) {
         baseCode = baseCode.toUpperCase();
         targetCode = targetCode.toUpperCase();
 
@@ -131,16 +130,22 @@ public class ExchangeRatesRepository {
                 pstmt.setString(3, baseCode);
                 pstmt.setString(4, targetCode);
 
+
                 try (ResultSet rs = pstmt.executeQuery()) {
                     while (rs.next()) {
                         String code = rs.getString("code");
+
+                        BigDecimal rate = new BigDecimal(rs.getBigDecimal("rub_rate").doubleValue());
+                        BigDecimal rounded = rate.setScale(2, RoundingMode.HALF_UP);
+
+
                         if (code.equals(baseCode)) {
                             baseId = rs.getLong("id");
                             baseCurrency = new Currency(
                                     baseId,
                                     rs.getString("name"),
                                     code,
-                                    rs.getBigDecimal("rub_rate"),
+                                    rounded,
                                     rs.getString("sign")
                             );
                         } else if (code.equals(targetCode)) {
@@ -149,7 +154,7 @@ public class ExchangeRatesRepository {
                                     targetId,
                                     rs.getString("name"),
                                     code,
-                                    rs.getBigDecimal("rub_rate"),
+                                    rounded,
                                     rs.getString("sign")
                             );
                         }
@@ -157,14 +162,14 @@ public class ExchangeRatesRepository {
                 }
             }
 
-//            // Проверяем, найдены ли обе валюты
+            // Проверяем, найдены ли обе валюты
             if (baseCurrency == null) {
                 throw new NotFoundException("Базовая валюта с кодом " + baseCode + " не найдена");
             }
             if (targetCurrency == null) {
                 throw new NotFoundException("Целевая валюта с кодом " + targetCode + " не найдена");
             }
-// Проверяем, нет ли уже такой пары (опционально, но рекомендуется)
+            // Проверяем, нет ли уже такой пары (опционально, но рекомендуется)
             String checkDuplicate = """
                     SELECT 1 FROM exchange_rates
                     WHERE base_currency_id = ? AND target_currency_id = ?
@@ -203,14 +208,12 @@ public class ExchangeRatesRepository {
                         throw new SQLException("Не удалось получить ID новой записи");
                     }
                 }
-                // Формируем ответ
-                ExchangeRate exchangeRate = new ExchangeRate(
+                return new ExchangeRate(
                         generatedId,
                         baseCurrency,
                         targetCurrency,
                         calculateRates
                 );
-                return exchangeRate;
             }
         } catch (SQLException e) {
             throw new RuntimeException("Ошибка SQL");
@@ -218,12 +221,109 @@ public class ExchangeRatesRepository {
     }
 
 
+    public ExchangeRate updateExchangeRate(String baseCode, String targetCode, BigDecimal newRate) {
+        baseCode = baseCode.toUpperCase();
+        targetCode = targetCode.toUpperCase();
+
+        // 3. Поиск пары
+        String sqlFind = """
+                SELECT er.id as rate_id,
+                       er.rate,
+                       base.id AS base_id,
+                       base.name AS base_name,
+                       base.code AS base_code,
+                       base.rub_rate as base_rub_rate,
+                       base.sign AS base_sign,
+                       target.id AS target_id,
+                       target.name AS target_name,
+                       target.code AS target_code,
+                       target.rub_rate as target_rub_rate,
+                       target.sign AS target_sign
+                FROM exchange_rates er
+                JOIN currencies base  ON er.base_currency_id  = base.id
+                JOIN currencies target ON er.target_currency_id = target.id
+                WHERE base.code = ? AND target.code = ?
+                """;
+
+        try (Connection conn = DatabaseUtil.getConnection(context);
+             PreparedStatement pstmt = conn.prepareStatement(sqlFind)) {
+
+            pstmt.setString(1, baseCode);
+            pstmt.setString(2, targetCode);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (!rs.next()) {
+                    throw new NotFoundException("Пара " + baseCode + "/" + targetCode + " не найдена");
+                }
+
+                long rateId = rs.getLong("rate_id");
+
+                // 4. Обновление курса
+                String sqlUpdate = "UPDATE exchange_rates SET rate = ? WHERE id = ?";
+                try (PreparedStatement updateStmt = conn.prepareStatement(sqlUpdate)) {
+                    updateStmt.setBigDecimal(1, newRate);
+                    updateStmt.setLong(2, rateId);
+                    updateStmt.executeUpdate();
+                }
+
+                // 5. Формируем ответ (тот же формат, что и в GET)
+
+
+                BigDecimal baseRubRateRound = new BigDecimal(rs.getBigDecimal("base_rub_rate").doubleValue());
+                BigDecimal baseRubRateRounded = baseRubRateRound.setScale(2, RoundingMode.HALF_UP);
+
+                BigDecimal targetRubRateRound = new BigDecimal(rs.getBigDecimal("target_rub_rate").doubleValue());
+                BigDecimal targetRubRateRounded = targetRubRateRound.setScale(2, RoundingMode.HALF_UP);
+
+
+                Currency base = new Currency(
+                        rs.getLong("base_id"),
+                        rs.getString("base_name"),
+                        rs.getString("base_code"),
+                        baseRubRateRounded,
+                        rs.getString("base_sign")
+                );
+
+                Currency target = new Currency(
+                        rs.getLong("target_id"),
+                        rs.getString("target_name"),
+                        rs.getString("target_code"),
+                        targetRubRateRounded,
+                        rs.getString("target_sign")
+                );
+
+                return new ExchangeRate(
+                        rateId,
+                        base,
+                        target,
+                        newRate
+                );
+//                return mapToExchangeRate(rs);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Ошибка БД: " + e.getMessage());
+        }
+    }
+
+
     public ExchangeRate mapToExchangeRate(ResultSet rs) throws SQLException {
+
+        BigDecimal baseRubRateRound = new BigDecimal(rs.getBigDecimal("base_rub_rate").doubleValue());
+        BigDecimal baseRubRateRounded = baseRubRateRound.setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal targetRubRateRound = new BigDecimal(rs.getBigDecimal("target_rub_rate").doubleValue());
+        BigDecimal targetRubRateRounded = targetRubRateRound.setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal rateRound = new BigDecimal(rs.getBigDecimal("rate").doubleValue());
+        BigDecimal rateRounded = rateRound.setScale(2, RoundingMode.HALF_UP);
+
         Currency base = new Currency(
                 rs.getLong("base_id"),
                 rs.getString("base_name"),
                 rs.getString("base_code"),
-                rs.getBigDecimal("base_rub_rate"),
+                baseRubRateRounded,
                 rs.getString("base_sign")
         );
 
@@ -231,7 +331,7 @@ public class ExchangeRatesRepository {
                 rs.getLong("target_id"),
                 rs.getString("target_name"),
                 rs.getString("target_code"),
-                rs.getBigDecimal("target_rub_rate"),
+                targetRubRateRounded,
                 rs.getString("target_sign")
         );
 
@@ -239,9 +339,8 @@ public class ExchangeRatesRepository {
                 rs.getLong("rate_id"),
                 base,
                 target,
-                rs.getBigDecimal("rate")
+                rateRounded
         );
-
         return rate;
     }
 
@@ -265,7 +364,7 @@ public class ExchangeRatesRepository {
 //        USD/EUR = 79.7296 * 0.0107 = 0.8531
 
         BigDecimal rub = new BigDecimal(1);
-        BigDecimal roundedResult = rub.divide(targetCurrencyRate, 4, RoundingMode.HALF_UP);
+        BigDecimal roundedResult = rub.divide(targetCurrencyRate, 2, RoundingMode.HALF_UP);
 
         return baseCurrencyRate.multiply(roundedResult);
     }
@@ -385,7 +484,7 @@ public class ExchangeRatesRepository {
                 if (rs.next()) {
 
                     BigDecimal reverseRate = rs.getBigDecimal("rate");
-                    BigDecimal directRate = BigDecimal.ONE.divide(reverseRate, 10, RoundingMode.HALF_UP);
+                    BigDecimal directRate = BigDecimal.ONE.divide(reverseRate, 2, RoundingMode.HALF_UP);
 
                     Currency base = new Currency(
                             rs.getLong("target_id"),  // теперь from — это бывшая target
@@ -414,12 +513,8 @@ public class ExchangeRatesRepository {
                     );
 
                     return result;
-//                    return Response.ok(result).build();
                 } else {
                     throw new NotFoundException("Курс для пары " + fromCode + "/" + toCode + " не найден");
-//                    return Response.status(Response.Status.NOT_FOUND)
-//                            .entity("{\"error\": \"Курс для пары " + fromCode + "/" + toCode + " не найден\"}")
-//                            .build();
                 }
             }
         }

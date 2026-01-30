@@ -2,12 +2,15 @@ package dev.folomkin.backend.util;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.folomkin.backend.resources.currencies.CurrencyResource;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.sql.*;
@@ -17,26 +20,22 @@ public class DatabaseInitializer implements ServletContextListener {
 
     private static final String DB_URL = "jdbc:sqlite:/WEB-INF/data/app.db";
 
+    private static final Logger log = LoggerFactory.getLogger(CurrencyResource.class);
+
+
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         try {
             String dbDirPath = sce.getServletContext().getRealPath("/WEB-INF/data");
-            System.out.println("=== ИНИЦИАЛИЗАЦИЯ БД ===");
-            System.out.println("getRealPath вернул: " + dbDirPath);
+            log.debug("=== ИНИЦИАЛИЗАЦИЯ БД ===");
 
             if (dbDirPath == null) {
                 throw new RuntimeException("getRealPath вернулся null — контейнер не поддерживает запись (например, WAR без распаковки)");
             }
-
             File dbDir = new File(dbDirPath);
-            System.out.println("Папка существует? " + dbDir.exists());
-            System.out.println("Папка — директория? " + dbDir.isDirectory());
-            System.out.println("Можно читать? " + dbDir.canRead());
-            System.out.println("Можно писать? " + dbDir.canWrite());
-
             if (!dbDir.exists()) {
                 boolean created = dbDir.mkdirs();
-                System.out.println("Попытка создать папку: " + created);
+                log.debug("Создание папки: {}", created);
                 if (!created) {
                     throw new RuntimeException("Не удалось создать папку " + dbDirPath);
                 }
@@ -44,42 +43,13 @@ public class DatabaseInitializer implements ServletContextListener {
 
             String dbPath = dbDirPath + "/app.db";
             String url = "jdbc:sqlite:" + dbPath;
-            System.out.println("URL для подключения: " + url);
-
+            log.debug("URL для подключения: {}", url);
             sce.getServletContext().setAttribute("DB_URL", url);
 
-            // Подключаемся — здесь SQLite должен создать файл
-            System.out.println("Пытаемся подключиться к БД...");
+            log.debug("Попопытка подключения к БД...");
             Class.forName("org.sqlite.JDBC");  // Ручная регистрация драйвера
             try (Connection conn = DriverManager.getConnection(url)) {
-                System.out.println("Подключение успешно! Файл БД должен быть создан.");
-
-//                try (Statement stmt = conn.createStatement()) {
-//                    stmt.execute("""
-//                            CREATE TABLE IF NOT EXISTS users (
-//                                id INTEGER PRIMARY KEY AUTOINCREMENT,
-//                                name TEXT NOT NULL,
-//                                email TEXT UNIQUE NOT NULL
-//                            )
-//                            """);
-//                    System.out.println("Таблица users создана/проверена.");
-//                }
-
-//                try (Statement stmt = conn.createStatement()) {
-//                    stmt.execute("""
-//                            CREATE TABLE IF NOT EXISTS currency_rates
-//                            (
-//                                code     TEXT PRIMARY KEY,
-//                                id       TEXT,
-//                                num_code TEXT,
-//                                nominal  INTEGER,
-//                                name     TEXT,
-//                                value    REAL,
-//                                previous REAL
-//                            );
-//                            """);
-//                    System.out.println("Таблица currency_rates создана/проверена.");
-//                }
+                log.debug("Подключение успешно! Файл БД должен быть создан.");
 
                 try (Statement stmt = conn.createStatement()) {
                     stmt.execute("""
@@ -92,7 +62,7 @@ public class DatabaseInitializer implements ServletContextListener {
                                  sign      VARCHAR(50)
                              );
                             """);
-                    System.out.println("Таблица currencies создана/проверена.");
+                    log.debug("Таблица currencies создана/проверена.");
                 }
                 try (Statement stmt = conn.createStatement()) {
                     stmt.execute("""
@@ -102,37 +72,37 @@ public class DatabaseInitializer implements ServletContextListener {
                                    base_currency_id   INT            NOT NULL,
                                    target_currency_id INT            NOT NULL,
                                    rate               DECIMAL(10, 6) NOT NULL CHECK (rate >= 0),
-
+                            
                                    -- Внешний ключ, связывающий exchangeRates с currencies
                                    CONSTRAINT base_currency
                                        FOREIGN KEY (base_currency_id)
                                            REFERENCES currencies (id)
                                            ON DELETE RESTRICT
                                            ON UPDATE CASCADE,
-
+                            
                                    CONSTRAINT target_currency
                                        FOREIGN KEY (target_currency_id)
                                            REFERENCES currencies (id)
                                            ON DELETE RESTRICT
                                            ON UPDATE CASCADE
-
-
+                            
+                            
                                );
                             """);
-                    System.out.println("Таблица exchange_rates создана/проверена.");
-                    loadInitialCurrencies(conn);
+                    log.debug("Таблица exchange_rates создана/проверена.");
+                    loadInitialCurrencies(conn); // Загрузка списка валют из ЦБ РФ
                 }
             }
 
             // Проверяем наличие файла после подключения
             File dbFile = new File(dbPath);
-            System.out.println("Файл БД существует после подключения? " + dbFile.exists());
+            log.debug("Файл БД существует после подключения? {}", dbFile.exists());
             if (dbFile.exists()) {
-                System.out.println("Размер файла: " + dbFile.length() + " байт");
+                log.debug("Размер файла: {} байт", dbFile.length());
             }
-            System.out.println("=== ИНИЦИАЛИЗАЦИЯ БД ЗАВЕРШЕНА УСПЕШНО ===");
+            log.debug("=== ИНИЦИАЛИЗАЦИЯ БД ЗАВЕРШЕНА УСПЕШНО ===");
         } catch (Exception e) {
-            System.err.println("=== ОШИБКА ИНИЦИАЛИЗАЦИИ БД ===");
+            log.error("=== ОШИБКА ИНИЦИАЛИЗАЦИИ БД ===");
             e.printStackTrace();
             throw new RuntimeException("Критическая ошибка инициализации БД", e);
         }

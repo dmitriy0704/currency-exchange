@@ -1,11 +1,8 @@
-package dev.folomkin.backend.resources;
+package dev.folomkin.backend.resources.currencies;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.folomkin.backend.repository.UserRepository;
-import dev.folomkin.backend.service.UserService;
 import dev.folomkin.backend.util.DatabaseUtil;
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.ServletContext;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -23,7 +20,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 @Path("/currencies-upload")
-public class UploadResource {
+public class UploadCurrenciesResource {
 
     @Context
     private ServletContext context;

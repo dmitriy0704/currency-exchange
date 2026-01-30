@@ -1,9 +1,8 @@
-package dev.folomkin.backend.resources;
+package dev.folomkin.backend.resources.currencies;
 
 import dev.folomkin.backend.exception.ConflictException;
 import dev.folomkin.backend.model.CreateCurrencyRequestDto;
 import dev.folomkin.backend.model.Currency;
-import dev.folomkin.backend.model.User;
 import dev.folomkin.backend.repository.CurrenciesRepository;
 import dev.folomkin.backend.service.CurrenciesService;
 import jakarta.annotation.PostConstruct;
@@ -26,7 +25,6 @@ public class CurrencyResource {
 
     private static final Logger log = LoggerFactory.getLogger(CurrencyResource.class);
 
-
     @Context
     private ServletContext context;
 
@@ -42,7 +40,7 @@ public class CurrencyResource {
     @Path("/{code}")
     public Response getCurrencyByCode(@PathParam("code") String code) {
 
-        log.info("Code: {}", code);
+        log.debug("Code: {}", code);
         String normalizedCode = code.trim().toUpperCase();
         try {
             Currency currency = currenciesService.getCurrencyByCode(normalizedCode);
